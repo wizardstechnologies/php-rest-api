@@ -1,0 +1,25 @@
+{
+  "name": "wizards/rest-api",
+  "description": "A set of services to help you create beautiful REST APIs",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Romain Richard",
+      "email": "bigzounet@hotmail.com"
+    }
+  ],
+  "require": {
+    "php": ">=7.1",
+    "psr/http-message": "^1.0"
+  },
+  "require-dev": {
+  },
+  "suggest": {
+  },
+  "autoload": {
+    "psr-0": { "WizardsRest": "src/" }
+  },
+  "config": {
+    "bin-dir": "bin"
+  }
+}
