@@ -4,6 +4,9 @@ namespace WizardsRest\Exception;
 
 /**
  * HttpException.
+ * The whole symfony or laravel http was kinda heavy to include.
+ *
+ * @author Romain Richard
  */
 class HttpException extends \RuntimeException
 {

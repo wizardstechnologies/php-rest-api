@@ -1,25 +1,22 @@
 <?php
 
-namespace App\Transformer;
+namespace WizardsRest\Transformer;
 
 use WizardsRest\Exception\IncludeNotFoundException;
-use WizardsRestc\ObjectReader\ObjectReaderInterface;
+use WizardsRest\ObjectReader\ObjectReaderInterface;
 use League\Fractal\TransformerAbstract;
-use Symfony\Component\HttpFoundation\Request;
 
+/**
+ * A generic Fractal Transformer to transform an entity/document to a Fractal Resource.
+ *
+ * @author Romain Richard
+ */
 class EntityTransformer extends TransformerAbstract
 {
     /**
      * @var ObjectReaderInterface
      */
     private $objectReader;
-
-    /**
-     * List of resources possible to include
-     *
-     * @var array
-     */
-    protected $availableIncludes = [];
 
     /**
      * List of fields possible to display
@@ -30,6 +27,7 @@ class EntityTransformer extends TransformerAbstract
 
     /**
      * EntityTransformer constructor.
+     * It needs an objectReader to know which fields to expose.
      *
      * @param ObjectReaderInterface $objectReader
      */
@@ -55,7 +53,10 @@ class EntityTransformer extends TransformerAbstract
     }
 
     /**
-     * @param $resource
+     * Transform an object to an array thanks to the object reader.
+     *
+     * @param object $resource An entity/document to expose
+     *
      * @return mixed
      */
     public function transform($resource)
@@ -63,6 +64,14 @@ class EntityTransformer extends TransformerAbstract
         return $this->objectReader->getExposedProperties($resource, $this->availableFields);
     }
 
+    /**
+     * Dynamic inclusion of included/embedded params.
+     *
+     * @param $name
+     * @param $arguments
+     *
+     * @return \League\Fractal\Resource\Collection|\League\Fractal\Resource\Item
+     */
     public function __call($name, $arguments)
     {
         if (0 === strpos($name, 'include') && strlen($name) > strlen('include')) {
@@ -72,14 +81,17 @@ class EntityTransformer extends TransformerAbstract
                     substr($name, strlen('include'), strlen($name))
                 );
             } catch (\Exception $exception) {
-               throw new IncludeNotFoundException();
+                throw new IncludeNotFoundException();
             }
         }
     }
 
     /**
+     * Get the include value.
+     *
      * @param $entity
      * @param $name
+     *
      * @return \League\Fractal\Resource\Collection|\League\Fractal\Resource\Item
      */
     private function includeResource($entity, $name)

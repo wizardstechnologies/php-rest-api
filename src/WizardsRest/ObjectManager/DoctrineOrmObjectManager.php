@@ -1,16 +1,19 @@
 <?php
 
-namespace App\ObjectManager;
+namespace WizardsRest\ObjectManager;
 
 use Doctrine\Common\Persistence\ObjectManager;
 use Doctrine\ORM\QueryBuilder;
 use League\Fractal\Pagination\PagerfantaPaginatorAdapter;
 use Pagerfanta\Adapter\DoctrineORMAdapter;
 use Pagerfanta\Pagerfanta;
+use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\RouterInterface;
+use WizardsRest\Parser\RestQueryParser;
 
 /**
- * Interface ObjectManagerInterface.
+ * doctrine orm object manager
+ * used to fetch & paginate collections according to the request
  *
  * @author Romain Richard
  */
@@ -40,48 +43,54 @@ class DoctrineOrmObjectManager implements ObjectManagerInterface
     {
         $this->objectManager = $objectManager;
         $this->router = $router;
-        $this->paninator = null;
+        $this->paginator = null;
     }
 
     /**
-     * @param $className
-     * @param $request
+     * @param string $className
+     * @param ServerRequestInterface $request
      *
-     * @return array|mixed|\Traversable
+     * @return array|\Traversable
      */
-    public function getPaginatedCollection($className, $request)
+    public function getPaginatedCollection($className, ServerRequestInterface $request)
     {
+        $parameters = new RestQueryParser($request);
         $doctrineAdapter = new DoctrineORMAdapter(
             $this->findAllSorted(
                 $className,
-                $this->parseSorting($request->query->get('sort', '')),
-                $request->query->get('filter', []),
-                $request->query->get('filteroperator', [])
+                $this->parseSorting($parameters->get(RestQueryParser::PARAMETER_SORT)),
+                $parameters->get(RestQueryParser::PARAMETER_FILTER),
+                $parameters->get(RestQueryParser::PARAMETER_FILTER_OPERATOR)
             )
         );
         $this->paginator = new Pagerfanta($doctrineAdapter);
-        $this->paginator->setMaxPerPage($request->query->get('limit', 10));
-        $this->paginator->setCurrentPage($request->query->get('page', 1));
+        $this->paginator->setMaxPerPage($parameters->get(RestQueryParser::PARAMETER_LIMIT));
+        $this->paginator->setCurrentPage($parameters->get(RestQueryParser::PARAMETER_PAGE));
 
         return $this->paginator->getCurrentPageResults();
     }
 
     /**
-     * @param $request
+     * @param ServerRequestInterface $request
+     *
      * @return PagerfantaPaginatorAdapter|mixed
      */
-    public function getPaginationAdapter($request)
+    public function getPaginationAdapter(ServerRequestInterface $request)
     {
         $router = $this->router;
+        $attributes = $request->getAttributes();
+
         return new PagerfantaPaginatorAdapter(
             $this->paginator,
-            function(int $page) use ($request, $router) {
-                $route = $request->attributes->get('_route');
-                $inputParams = $request->attributes->get('_route_params');
-                $newParams = array_merge($inputParams, $request->query->all());
+            function (int $page) use ($request, $attributes, $router) {
+                $route = $attributes['_route'];
+                $inputParams = $attributes['_route_params'];
+                $newParams = array_merge($inputParams, $request->getQueryParams());
                 $newParams['page'] = $page;
+
                 return $router->generate($route, $newParams);
-            });
+            }
+        );
     }
 
     /**

@@ -1,13 +1,13 @@
 <?php
 
-namespace App\ObjectReader;
+namespace WizardsRest\ObjectReader;
 
-use App\Annotation\Embeddable;
-use App\Annotation\Exposable;
+use WizardsRest\Annotation\Embeddable;
+use WizardsRest\Annotation\Exposable;
 use Doctrine\Common\Annotations\Reader;
 
 /**
- * Reads annotations.
+ * Reads an object configuration from annotations.
  *
  * @author Romain Richard
  */
@@ -28,69 +28,21 @@ class DoctrineAnnotationReader implements ObjectReaderInterface
     }
 
     /**
-     * Get the route name of a relationship.
+     * Get a resource name.
      *
-     * @param \ReflectionProperty $property
-     * @param string              $targetClass
+     * @TODO: We sould have different sources for this: configuration, annotation reflection
+     *
+     * @param $resource
      *
      * @return string
      *
      * @throws \ReflectionException
      */
-    public function getAssociationRouteName(\ReflectionProperty $property, $targetClass)
+    public function getResourceName($resource)
     {
-        /**
-         * @var Embeddable
-         */
-        $annotation = $this->annotationReader->getPropertyAnnotation($property, Embeddable::class);
+        $reflection = new \ReflectionClass($resource);
 
-        if (null !== $annotation && $annotation->getRouteName()) {
-            return $annotation->getRouteName();
-        }
-
-        return $this->getResourceRouteName(new \ReflectionClass($targetClass));
-    }
-
-    /**
-     * Return the configured route name for a resource, or get_*entityShortName* by default.
-     *
-     * @param \ReflectionClass $resource
-     *
-     * @return string
-     */
-    public function getResourceRouteName(\ReflectionClass $resource)
-    {
-        /**
-         * @var Embeddable
-         */
-        $annotation = $this->annotationReader->getClassAnnotation($resource, Embeddable::class);
-
-        if (null !== $annotation && $annotation->getRouteName()) {
-            return $annotation->getRouteName();
-        }
-
-        return sprintf('get_%s', strtolower($resource->getShortName()));
-    }
-
-    /**
-     * Return the configured route name for a resource collection, or get_*entityShortName*s by default.
-     *
-     * @param \ReflectionClass $resource
-     *
-     * @return string
-     */
-    public function getResourceCollectionRouteName(\ReflectionClass $resource)
-    {
-        /**
-         * @var Embeddable
-         */
-        $annotation = $this->annotationReader->getClassAnnotation($resource, Embeddable::class);
-
-        if (null !== $annotation && $annotation->getCollectionRouteName()) {
-            return $annotation->getCollectionRouteName();
-        }
-
-        return sprintf('get_%ss', strtolower($resource->getShortName()));
+        return strtolower($reflection->getShortName());
     }
 
     /**

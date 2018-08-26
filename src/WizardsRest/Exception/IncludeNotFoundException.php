@@ -2,9 +2,14 @@
 
 namespace WizardsRest\Exception;
 
-use WizardsRest\Exception\BadRequestHttpException;
-
-class IncludeNotFoundException extends BadRequestHttpException
+/**
+ * Class IncludeNotFoundException
+ *
+ * @package WizardsRest\Exception
+ *
+ * @author Romain Richard
+ */
+class IncludeNotFoundException extends BadRequestException
 {
     public function __construct()
     {

@@ -1,6 +1,8 @@
 <?php
 
-namespace App\ObjectManager;
+namespace WizardsRest\ObjectManager;
+
+use League\Fractal\Pagination\PaginatorInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 /**
@@ -12,15 +14,15 @@ interface ObjectManagerInterface
 {
     /**
      * @param $className
-     * @param $request
+     * @param ServerRequestInterface$request
      *
      * @return mixed
      */
-    public function getPaginatedCollection($className, $request);
+    public function getPaginatedCollection($className, ServerRequestInterface $request);
 
     /**
-     * @param $request
-     * @return mixed
+     * @param ServerRequestInterface $request
+     * @return PaginatorInterface|null
      */
-    public function getPaginationAdapter($request);
+    public function getPaginationAdapter(ServerRequestInterface $request);
 }

@@ -2,15 +2,25 @@
 
 namespace WizardsRest;
 
-use App\ObjectManager\DoctrineOrmObjectManager;
-use App\Transformer\EntityTransformer;
-use Symfony\Component\HttpFoundation\Request;
+use WizardsRest\ObjectManager\DoctrineOrmObjectManager;
+use WizardsRest\Transformer\EntityTransformer;
+use Psr\Http\Message\ServerRequestInterface;
 use League\Fractal;
 use League\Fractal\Manager;
 use League\Fractal\Serializer\JsonApiSerializer;
 use League\Fractal\Serializer\ArraySerializer;
 use League\Fractal\Resource\ResourceInterface;
 
+/**
+ * A service to manage entity & collection transformation & serialization.
+ * Flow:
+ * $resource = $wizardsRest->transform($entityOrCollection, $request);
+ * $serialized = $wizardsRest->serialize($resource, $specification, $format);
+ *
+ * @package WizardsRest
+ *
+ * @author Romain Richard
+ */
 class WizardsRest
 {
     const SPEC_JSONAPI = 'SPEC_JSONAPI';
@@ -35,18 +45,37 @@ class WizardsRest
      */
     private $objectManager;
 
+    /**
+     * WizardsRest constructor.
+     *
+     * @param EntityTransformer $defaultTransformer
+     * @param DoctrineOrmObjectManager $objectManager
+     */
     public function __construct(
         EntityTransformer $defaultTransformer,
         DoctrineOrmObjectManager $objectManager
-    )
-    {
+    ) {
         $this->defaultTransformer = $defaultTransformer;
         $this->manager = new Manager();
         $this->objectManager = $objectManager;
     }
 
-    public function transform($entity, Request $request, Fractal\TransformerAbstract $userTransformer = null)
-    {
+    /**
+     * Transforms an entity or a collection in a Fractal Resource.
+     *
+     * @param $entity
+     * @param ServerRequestInterface $request
+     * @param Fractal\TransformerAbstract|null $userTransformer
+     *
+     * @return Fractal\Resource\Collection|Fractal\Resource\Item
+     *
+     * @throws \ReflectionException
+     */
+    public function transform(
+        $entity,
+        ServerRequestInterface $request,
+        Fractal\TransformerAbstract $userTransformer = null
+    ) {
         $transformer = null === $userTransformer ? $this->getDefaultTransformer($request) : $userTransformer;
 
         // @TODO: parse includes only if option is activated, which should be the case by default
@@ -69,6 +98,15 @@ class WizardsRest
         );
     }
 
+    /**
+     * Serialize a Fractal Resource to the given format & specification.
+     *
+     * @param ResourceInterface $resource
+     * @param string $specification
+     * @param string $format
+     *
+     * @return array|string
+     */
     public function serialize(
         ResourceInterface $resource,
         $specification = self::SPEC_DATA_ARRAY,
@@ -93,7 +131,15 @@ class WizardsRest
         return $this->manager->createData($resource)->toArray();
     }
 
-    public function getPaginatedCollection($className, Request $request)
+    /**
+     * Fetches a paginated collection from the object manager.
+     *
+     * @param $className
+     * @param ServerRequestInterface $request
+     *
+     * @return array|\Traversable
+     */
+    public function getPaginatedCollection($className, ServerRequestInterface $request)
     {
         return $this->objectManager->getPaginatedCollection(
             $className,
@@ -101,12 +147,26 @@ class WizardsRest
         );
     }
 
+    /**
+     * Get the pagination adapter tailored for your object manager.
+     *
+     * @param $request
+     *
+     * @return Fractal\Pagination\PagerfantaPaginatorAdapter|mixed
+     */
     public function getPaginationAdapter($request)
     {
         return $this->objectManager->getPaginationAdapter($request);
     }
 
-    private function getDefaultTransformer(Request $request)
+    /**
+     * Get the default transformer which is a environment agnostic entity transformer
+     *
+     * @param ServerRequestInterface $request
+     *
+     * @return EntityTransformer
+     */
+    private function getDefaultTransformer(ServerRequestInterface $request)
     {
         $this->defaultTransformer->setAvailableIncludes($this->getComaSeparatedQueryParams($request, 'include'));
         $this->defaultTransformer->setAvailableFields($this->getComaSeparatedQueryParams($request, 'fields'));
@@ -115,14 +175,17 @@ class WizardsRest
     }
 
     /**
-     * Get the embed query param.
+     * Get the exploded value of a comma-separated query param
+     *
+     * @param ServerRequestInterface $request
+     * @param string $name
      *
      * @return array
      */
-    private function getComaSeparatedQueryParams(Request $request, $name)
+    private function getComaSeparatedQueryParams(ServerRequestInterface $request, string $name)
     {
-        $include = $request->query->get($name);
+        $queryParams = $request->getQueryParams();
 
-        return $include ? explode(',', $include) : [];
+        return isset($queryParams[$name]) ? explode(',', $queryParams[$name]) : [];
     }
 }

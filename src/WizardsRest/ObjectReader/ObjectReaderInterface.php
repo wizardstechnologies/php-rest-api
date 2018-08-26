@@ -1,54 +1,48 @@
 <?php
 
-namespace App\ObjectReader;
+namespace WizardsRest\ObjectReader;
 
 /**
- * Reads annotations.
+ * Tells us about an object exposition.
  *
  * @author Romain Richard
  */
 interface ObjectReaderInterface
 {
     /**
-     * Return the configured route name for an embeddable relation.
-     *
-     * @param \ReflectionProperty $property
-     * @param string              $targetClass
-     *
-     * @return string
-     */
-    public function getAssociationRouteName(\ReflectionProperty $property, $targetClass);
-
-    /**
-     * Return the configured route name for a resource, or get_*entityShortName* by default.
-     *
-     * @param \ReflectionClass $resource
-     *
-     * @return string
-     */
-    public function getResourceRouteName(\ReflectionClass $resource);
-
-    /**
-     * Return the configured route name for a resource collection, or get_*entityShortName*s by default.
-     *
-     * @param \ReflectionClass $resource
-     *
-     * @return string
-     */
-    public function getResourceCollectionRouteName(\ReflectionClass $resource);
-
-    /**
-     * Does an entity's property have the @embeddable annotation ?
+     * Can the given property be exposed ?
      *
      * @param \ReflectionProperty $property
      *
-     * @return bool
+     * @return mixed
+     */
+    public function isPropertyExposable(\ReflectionProperty $property);
+
+    /**
+     * Cant the given property be embedded/included ?
+     *
+     * @param \ReflectionProperty $property
+     *
+     * @return mixed
      */
     public function isPropertyEmbeddable(\ReflectionProperty $property);
 
-    public function isPropertyExposable(\ReflectionProperty $property);
-
+    /**
+     * Get the list of properties than can be exposed.
+     *
+     * @param $resource
+     * @param array $filter
+     *
+     * @return mixed
+     */
     public function getExposedProperties($resource, array $filter);
 
+    /**
+     * Get the value of an object's property.
+     * @param $resource
+     * @param string $name
+     *
+     * @return mixed
+     */
     public function getPropertyValue($resource, string $name);
 }
