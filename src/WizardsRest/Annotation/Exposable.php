@@ -12,7 +12,7 @@ namespace WizardsRest\Annotation;
 class Exposable
 {
     /**
-     * @var string
+     * @var string $getter
      */
     private $getter;
 
@@ -37,9 +37,9 @@ class Exposable
     }
 
     /**
-     * @param $getter
+     * @param string $getter
      */
-    public function setGetter($getter)
+    public function setGetter(string $getter)
     {
         $this->getter = $getter;
     }

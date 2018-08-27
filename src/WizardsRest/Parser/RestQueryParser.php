@@ -50,6 +50,25 @@ class RestQueryParser
         return $this->parsedParameters[$name] ?? null;
     }
 
+    public function getParsedSorting()
+    {
+        $parsed = [];
+
+        if ($this->get(self::PARAMETER_SORT)) {
+            $nameList = explode(',', $this->get(self::PARAMETER_SORT));
+            foreach ($nameList as $name) {
+                if ('-' === $name[0]) {
+                    $parsed[substr($name, 1, strlen($name))] = 'desc';
+                    continue;
+                }
+
+                $parsed[$name] = 'asc';
+            }
+        }
+
+        return $parsed;
+    }
+
     /**
      * @param ServerRequestInterface $request
      *
