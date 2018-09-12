@@ -39,7 +39,7 @@ class Exposable
     /**
      * @param string $getter
      */
-    public function setGetter(string $getter)
+    public function setGetter(string $getter = null)
     {
         $this->getter = $getter;
     }
