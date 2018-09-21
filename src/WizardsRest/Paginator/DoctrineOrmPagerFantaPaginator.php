@@ -27,24 +27,18 @@ class DoctrineOrmPagerFantaPaginator implements PaginatorInterface
         $this->router = $router;
     }
 
-    public function paginate($collection, $request)
+    public function paginate($collection, ServerRequestInterface $request)
     {
-        $parameters = new RestQueryParser($request);
-        $doctrineAdapter = new DoctrineORMAdapter($collection);
-        $this->paginator = new Pagerfanta($doctrineAdapter);
-        $this->paginator->setMaxPerPage($parameters->get(RestQueryParser::PARAMETER_LIMIT));
-        $this->paginator->setCurrentPage($parameters->get(RestQueryParser::PARAMETER_PAGE));
-
-        return $this->paginator->getCurrentPageResults();
+        return $this->getPaginator($collection, $request)->getCurrentPageResults();
     }
 
-    public function getPaginationAdapter(ServerRequestInterface $request): FractalPaginatorInterface
+    public function getPaginationAdapter($collection, ServerRequestInterface $request): FractalPaginatorInterface
     {
         $router = $this->router;
         $attributes = $request->getAttributes();
 
         return new PagerfantaPaginatorAdapter(
-            $this->paginator,
+            $this->getPaginator($collection, $request),
             function (int $page) use ($request, $attributes, $router) {
                 $route = $attributes['_route'];
                 $inputParams = $attributes['_route_params'];
@@ -54,5 +48,20 @@ class DoctrineOrmPagerFantaPaginator implements PaginatorInterface
                 return $router->generate($route, $newParams);
             }
         );
+    }
+
+    private function getPaginator($collection, ServerRequestInterface $request)
+    {
+        if ($this->paginator) {
+            return $this->paginator;
+        }
+
+        $parameters = new RestQueryParser($request);
+        $doctrineAdapter = new DoctrineORMAdapter($collection);
+        $this->paginator = new Pagerfanta($doctrineAdapter);
+        $this->paginator->setMaxPerPage($parameters->get(RestQueryParser::PARAMETER_LIMIT));
+        $this->paginator->setCurrentPage($parameters->get(RestQueryParser::PARAMETER_PAGE));
+
+        return $this->paginator;
     }
 }

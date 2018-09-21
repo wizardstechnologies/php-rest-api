@@ -6,6 +6,7 @@ use WizardsRest\Transformer\EntityTransformer;
 use Psr\Http\Message\ServerRequestInterface;
 use League\Fractal;
 use League\Fractal\Manager;
+use League\Fractal\Resource\ResourceAbstract;
 
 /**
  * A service to help you abstract an entity or a collection with fractal
@@ -46,27 +47,27 @@ class Provider
     public function transform(
         $entity,
         ServerRequestInterface $request,
-        Fractal\TransformerAbstract $userTransformer = null
-    ) {
+        $userTransformer = null,
+        string $name = null
+    ): ResourceAbstract {
         $transformer = null === $userTransformer ? $this->getDefaultTransformer($request) : $userTransformer;
 
         // @TODO: parse includes only if option is activated, which should be the case by default
         // also, this could be done at many other places, is here the best place to ?
         $this->manager->parseIncludes($this->getComaSeparatedQueryParams($request, 'include'));
 
-
         if (is_array($entity) || $entity instanceof \Traversable) {
             return new Fractal\Resource\Collection(
                 $entity,
                 $transformer,
-                strtolower((new \ReflectionClass($entity[0]))->getShortName())
+                $name ?? strtolower((new \ReflectionClass($entity[0]))->getShortName())
             );
         }
 
         return new Fractal\Resource\Item(
             $entity,
             $transformer,
-            strtolower((new \ReflectionClass($entity))->getShortName())
+            $name ?? strtolower((new \ReflectionClass($entity))->getShortName())
         );
     }
 
