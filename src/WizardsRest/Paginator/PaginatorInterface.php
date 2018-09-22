@@ -7,7 +7,7 @@ use Psr\Http\Message\ServerRequestInterface;
 
 interface PaginatorInterface
 {
-    public function paginate($collection, $request);
+    public function paginate($collection, ServerRequestInterface $request);
 
-    public function getPaginationAdapter(ServerRequestInterface $request): FractalPaginatorInterface;
+    public function getPaginationAdapter($collection, ServerRequestInterface $request): FractalPaginatorInterface;
 }

@@ -28,7 +28,7 @@ class CollectionManager
      */
     private $objectManager;
 
-    public function __construct(ObjectManagerInterface $objectManager, PaginatorInterface $paginator)
+    public function __construct(PaginatorInterface $paginator, ObjectManagerInterface $objectManager)
     {
         $this->objectManager = $objectManager;
         $this->paginator = $paginator;
@@ -40,13 +40,5 @@ class CollectionManager
     public function getPaginatedCollection(string $className, ServerRequestInterface $request): \Traversable
     {
         return $this->paginator->paginate($this->objectManager->fetchCollection($className, $request), $request);
-    }
-
-    /**
-     * Get the fractal pagination adapter based on your object manager and your paginator.
-     */
-    public function getPaginationAdapter(ServerRequestInterface $request): FractalPaginatorInterface
-    {
-        return $this->paginator->getPaginationAdapter($request);
     }
 }
