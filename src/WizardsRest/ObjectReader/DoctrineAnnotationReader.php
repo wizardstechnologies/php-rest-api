@@ -42,12 +42,14 @@ class DoctrineAnnotationReader implements ObjectReaderInterface
      */
     public function getResourceName($resource)
     {
-        $reflection = new \ReflectionClass($resource);
+        $reflection = $resource instanceof \Traversable
+            ? new \ReflectionClass(ClassUtils::getClass($resource[0]))
+            : new \ReflectionClass(ClassUtils::getClass($resource));
 
         /**
          * @var Type|null $resourceNameAnnotation
          */
-        $resourceNameAnnotation = $this->annotationReader->getClassAnnotation($resource, Type::class);
+        $resourceNameAnnotation = $this->annotationReader->getClassAnnotation($reflection, Type::class);
 
         if (null !== $resourceNameAnnotation) {
             return $resourceNameAnnotation->getType();
@@ -98,7 +100,7 @@ class DoctrineAnnotationReader implements ObjectReaderInterface
                 $this->isPropertyExposable($property) &&
                 (count($filter) > 0 ? in_array($propertyName, $filter) || $propertyName === 'id' : true)
             ) {
-                $propertyList[$propertyName] = $resource->{$this->getPropertyGetter($property)}();
+                $propertyList[$propertyName] = $this->processValue($resource->{$this->getPropertyGetter($property)}());
             }
         }
 
@@ -120,6 +122,7 @@ class DoctrineAnnotationReader implements ObjectReaderInterface
 
     /**
      * if annotation has a getter property, use that, otherwise use get_*Property*
+     * @TODO document that
      * @param \ReflectionProperty $property
      * @return string
      */
@@ -132,5 +135,20 @@ class DoctrineAnnotationReader implements ObjectReaderInterface
         }
 
         return 'get'.ucfirst($property->getName());
+    }
+
+    /**
+     * @TODO: should be configurable via annotation. should be able to process more than dates
+     * @param $value
+     *
+     * @return string
+     */
+    private function processValue($value)
+    {
+        if ($value instanceof \DateTime) {
+            return $value->format(\DateTime::ATOM);
+        }
+
+        return $value;
     }
 }

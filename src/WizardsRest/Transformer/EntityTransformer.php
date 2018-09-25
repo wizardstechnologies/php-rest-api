@@ -99,10 +99,9 @@ class EntityTransformer extends TransformerAbstract
         $resource = $this->objectReader->getPropertyValue($entity, $name);
 
         if (is_array($resource) || $resource instanceof \Traversable) {
-            // @TODO needs to find a reliable and central method to figure out entityname
-            return $this->collection($resource, $this, strtolower($name));
+            return $this->collection($resource, $this, $this->objectReader->getResourceName($resource));
         }
 
-        return $this->item($resource, $this, strtolower($name));
+        return $this->item($resource, $this, $this->objectReader->getResourceName($resource));
     }
 }
