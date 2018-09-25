@@ -27,10 +27,10 @@ class Provider
      */
     private $manager;
 
-    public function __construct(EntityTransformer $defaultTransformer)
+    public function __construct(EntityTransformer $defaultTransformer, Manager $manager)
     {
         $this->defaultTransformer = $defaultTransformer;
-        $this->manager = new Manager();
+        $this->manager = $manager;
     }
 
     /**
@@ -50,11 +50,11 @@ class Provider
         $userTransformer = null,
         string $name = null
     ): ResourceAbstract {
-        $transformer = null === $userTransformer ? $this->getDefaultTransformer($request) : $userTransformer;
-
-        // @TODO: parse includes only if option is activated, which should be the case by default
-        // also, this could be done at many other places, is here the best place to ?
+        $this->defaultTransformer->setAvailableIncludes($this->getComaSeparatedQueryParams($request, 'include'));
+        $this->defaultTransformer->setAvailableFields($this->getComaSeparatedQueryParams($request, 'fields'));
         $this->manager->parseIncludes($this->getComaSeparatedQueryParams($request, 'include'));
+
+        $transformer = null === $userTransformer ? $this->getDefaultTransformer($request) : $userTransformer;
 
         if (is_array($entity) || $entity instanceof \Traversable) {
             return new Fractal\Resource\Collection(
