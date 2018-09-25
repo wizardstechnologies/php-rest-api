@@ -6,6 +6,7 @@ use Doctrine\Common\Util\ClassUtils;
 use WizardsRest\Annotation\Embeddable;
 use WizardsRest\Annotation\Exposable;
 use Doctrine\Common\Annotations\Reader;
+use WizardsRest\Annotation\Type;
 
 /**
  * Reads an object configuration from annotations.
@@ -31,7 +32,7 @@ class DoctrineAnnotationReader implements ObjectReaderInterface
     /**
      * Get a resource name.
      *
-     * @TODO: We sould have different sources for this: configuration, annotation reflection
+     * @TODO: We sould have more sources for this: configuration
      *
      * @param $resource
      *
@@ -42,6 +43,15 @@ class DoctrineAnnotationReader implements ObjectReaderInterface
     public function getResourceName($resource)
     {
         $reflection = new \ReflectionClass($resource);
+
+        /**
+         * @var Type|null $resourceNameAnnotation
+         */
+        $resourceNameAnnotation = $this->annotationReader->getClassAnnotation($resource, Type::class);
+
+        if (null !== $resourceNameAnnotation) {
+            return $resourceNameAnnotation->getType();
+        }
 
         return strtolower($reflection->getShortName());
     }

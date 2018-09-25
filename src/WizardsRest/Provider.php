@@ -2,6 +2,7 @@
 
 namespace WizardsRest;
 
+use WizardsRest\ObjectReader\ObjectReaderInterface;
 use WizardsRest\Transformer\EntityTransformer;
 use Psr\Http\Message\ServerRequestInterface;
 use League\Fractal;
@@ -27,10 +28,19 @@ class Provider
      */
     private $manager;
 
-    public function __construct(EntityTransformer $defaultTransformer, Manager $manager)
-    {
+    /**
+     * @var ObjectReaderInterface
+     */
+    private $reader;
+
+    public function __construct(
+        EntityTransformer $defaultTransformer,
+        Manager $manager,
+        ObjectReaderInterface $reader
+    ) {
         $this->defaultTransformer = $defaultTransformer;
         $this->manager = $manager;
+        $this->reader = $reader;
     }
 
     /**
@@ -60,14 +70,14 @@ class Provider
             return new Fractal\Resource\Collection(
                 $entity,
                 $transformer,
-                $name ?? strtolower((new \ReflectionClass($entity[0]))->getShortName())
+                $name ?? $this->reader->getResourceName($entity)
             );
         }
 
         return new Fractal\Resource\Item(
             $entity,
             $transformer,
-            $name ?? strtolower((new \ReflectionClass($entity))->getShortName())
+            $name ?? $this->reader->getResourceName($entity)
         );
     }
 
