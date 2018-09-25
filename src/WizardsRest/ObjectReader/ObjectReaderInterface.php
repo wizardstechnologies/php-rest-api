@@ -45,4 +45,6 @@ interface ObjectReaderInterface
      * @return mixed
      */
     public function getPropertyValue($resource, string $name);
+
+    public function getResourceName($resource);
 }
