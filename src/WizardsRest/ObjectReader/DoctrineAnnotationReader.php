@@ -33,6 +33,7 @@ class DoctrineAnnotationReader implements ObjectReaderInterface
      * Get a resource name.
      *
      * @TODO: We sould have more sources for this: configuration
+     * @TODO move from doctrine/common to doctrine/annotation
      *
      * @param $resource
      *

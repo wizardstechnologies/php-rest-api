@@ -7,7 +7,7 @@ namespace WizardsRest\Annotation;
  *
  * @Annotation
  *
- * @Target("CLASS")
+ * @Target({"CLASS", "METHOD"})
  */
 class Type
 {
