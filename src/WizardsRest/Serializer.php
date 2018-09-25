@@ -39,11 +39,13 @@ class Serializer
 
     /**
      * Serializer constructor.
+     *
+     * @param Manager $manager
      * @param string $baseUrl
      */
-    public function __construct($baseUrl = '')
+    public function __construct(Manager $manager, $baseUrl = '')
     {
-        $this->manager = new Manager();
+        $this->manager = $manager;
         $this->baseUrl = $baseUrl;
     }
 

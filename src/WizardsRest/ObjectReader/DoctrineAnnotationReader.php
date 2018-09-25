@@ -2,6 +2,7 @@
 
 namespace WizardsRest\ObjectReader;
 
+use Doctrine\Common\Util\ClassUtils;
 use WizardsRest\Annotation\Embeddable;
 use WizardsRest\Annotation\Exposable;
 use Doctrine\Common\Annotations\Reader;
@@ -76,12 +77,13 @@ class DoctrineAnnotationReader implements ObjectReaderInterface
         // as well has having multiple filtering strategies (fields=name,date...) such as all or nothing
         // and deep sparse fieldset (fields=label.name,gigs.date)
 
-        // current implementation takes everything if fields is unspecified or id + fields if specified
         $propertyList = [];
-        $reflectionClass = new \ReflectionClass($resource);
+        // @TODO move from doctrine/common to doctrine/reflection
+        $reflectionClass = new \ReflectionClass(ClassUtils::getClass($resource));
         foreach ($reflectionClass->getProperties() as $property) {
             $propertyName = $property->getName();
 
+            // current implementation takes everything if fields is unspecified or id + fields if specified
             if (
                 $this->isPropertyExposable($property) &&
                 (count($filter) > 0 ? in_array($propertyName, $filter) || $propertyName === 'id' : true)
