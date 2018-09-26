@@ -68,21 +68,59 @@ class DoctrineOrmObjectManager implements ObjectManagerInterface
                 }
             }
 
-            foreach ($fields as $field) {
-                if (isset($filterValues[$field])) {
-                    $operator = '=';
-
-                    if (isset($filerOperators[$field])
-                        && in_array($filerOperators[$field], ['>', '<', '>=', '<=', '=', '!='])
-                    ) {
-                        $operator = $filerOperators[$field];
-                    }
-
-                    $queryBuilder->andWhere('e.'.$field.$operator."'".$filterValues[$field]."'");
+            // @TODO: multiple sub filters on fields like
+            // ?filers[cards.amount]=100&filter[cards.userdId]=1&fileroperatos[cards.amount]=>=
+            // right now we can only filter on sub resources by id
+            foreach ($fields as $field => $reflection) {
+                $value = $this->getFilterValue($filterValues, $field);
+                if (null !== $value) {
+                    $operator = $this->getFilterOperator($filerOperators, $field);
+                    $field = $this->getFilterField($filterValues, $field);
+                    $queryBuilder->andWhere(sprintf("e.%s%s'%s'", $field, $operator, $value));
                 }
             }
 
             return $queryBuilder;
         }
+    }
+
+    /**
+     * @param $filterValues
+     * @param $field
+     * @return string|null
+     */
+    private function getFilterValue($filterValues, $field)
+    {
+        foreach ($filterValues as $filterName => $filterValue) {
+            $subsets = explode('.', $filterName);
+            if ($field == $subsets[0]) {
+                return $filterValue;
+            }
+        }
+
+        return null;
+    }
+
+    private function getFilterField($filterValues, $field)
+    {
+        foreach (array_keys($filterValues) as $filterName) {
+            $subsets = explode('.', $filterName);
+            if ($field == $subsets[0]) {
+                return $subsets[0];
+            }
+        }
+
+        return null;
+    }
+
+    private function getFilterOperator($filerOperators, $field)
+    {
+        $allowedFilters = ['>', '<', '>=', '<=', '=', '!='];
+
+        if (isset($filerOperators[$field]) && in_array($filerOperators[$field], $allowedFilters)) {
+            return $filerOperators[$field];
+        }
+
+        return '=';
     }
 }
