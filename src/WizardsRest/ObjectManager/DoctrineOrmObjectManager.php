@@ -4,12 +4,7 @@ namespace WizardsRest\ObjectManager;
 
 use Doctrine\Common\Persistence\ObjectManager;
 use Doctrine\ORM\QueryBuilder;
-use League\Fractal\Pagination\PagerfantaPaginatorAdapter;
-use League\Fractal\Pagination\PaginatorInterface;
-use Pagerfanta\Adapter\DoctrineORMAdapter;
-use Pagerfanta\Pagerfanta;
 use Psr\Http\Message\ServerRequestInterface;
-use Symfony\Component\Routing\RouterInterface;
 use WizardsRest\Parser\RestQueryParser;
 
 /**
@@ -53,7 +48,7 @@ class DoctrineOrmObjectManager implements ObjectManagerInterface
      */
     private function findAllSorted($className, array $sorting = [], array $filterValues = [], array $filerOperators = [])
     {
-        $fields = array_keys($this->objectManager->getClassMetadata($className)->fieldMappings);
+        $fields = array_keys($this->objectManager->getClassMetadata($className)->getReflectionProperties());
         $repository = $this->objectManager->getRepository($className);
 
         // If user's own implementation is defined, use it
@@ -71,7 +66,7 @@ class DoctrineOrmObjectManager implements ObjectManagerInterface
             // @TODO: multiple sub filters on fields like
             // ?filers[cards.amount]=100&filter[cards.userdId]=1&fileroperatos[cards.amount]=>=
             // right now we can only filter on sub resources by id
-            foreach ($fields as $field => $reflection) {
+            foreach ($fields as $field) {
                 $value = $this->getFilterValue($filterValues, $field);
                 if (null !== $value) {
                     $operator = $this->getFilterOperator($filerOperators, $field);
