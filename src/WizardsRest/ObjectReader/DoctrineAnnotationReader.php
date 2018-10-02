@@ -43,6 +43,10 @@ class DoctrineAnnotationReader implements ObjectReaderInterface
      */
     public function getResourceName($resource)
     {
+        if ($resource instanceof \Traversable && 0 === count($resource)) {
+            return null;
+        }
+
         $reflection = $resource instanceof \Traversable
             ? new \ReflectionClass(ClassUtils::getClass($resource[0]))
             : new \ReflectionClass(ClassUtils::getClass($resource));
