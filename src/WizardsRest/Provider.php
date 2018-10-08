@@ -60,8 +60,6 @@ class Provider
         $userTransformer = null,
         string $name = null
     ): ResourceAbstract {
-        $this->defaultTransformer->setAvailableIncludes($this->getComaSeparatedQueryParams($request, 'include'));
-        $this->defaultTransformer->setAvailableFields($this->getComaSeparatedQueryParams($request, 'fields'));
         $this->manager->parseIncludes($this->getComaSeparatedQueryParams($request, 'include'));
 
         $transformer = null === $userTransformer ? $this->getDefaultTransformer($request) : $userTransformer;
@@ -90,7 +88,20 @@ class Provider
      */
     private function getDefaultTransformer(ServerRequestInterface $request)
     {
-        $this->defaultTransformer->setAvailableIncludes($this->getComaSeparatedQueryParams($request, 'include'));
+        $includes = $this->getComaSeparatedQueryParams($request, 'include');
+
+        $flattenIncludes = [];
+
+        foreach ($includes as $include) {
+            $names = explode('.', $include);
+
+            foreach ($names as $name) {
+                $flattenIncludes[] = $name;
+            }
+        }
+
+        $this->defaultTransformer->setAvailableIncludes($flattenIncludes);
+
         $this->defaultTransformer->setAvailableFields($this->getComaSeparatedQueryParams($request, 'fields'));
 
         return $this->defaultTransformer;
