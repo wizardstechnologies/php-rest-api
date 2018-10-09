@@ -114,13 +114,20 @@ class DoctrineAnnotationReader implements ObjectReaderInterface
 
     public function getPropertyValue($resource, string $name)
     {
-        $getterMethod = 'get'.ucfirst($name);
-
         $reflectionClass = new \ReflectionClass($resource);
-        $getter = $reflectionClass->getMethod($getterMethod);
+
+        if ($resource instanceof Proxy) {
+            $getterMethod = 'get'.ucfirst($name);
+            $getter = $reflectionClass->getMethod($getterMethod);
+
+            return $resource->{$getter->name}();
+        }
+
+        $property = $reflectionClass->getProperty(strtolower($name));
+        $getter = $this->getPropertyGetter($property);
 
         if ($getter) {
-            return $resource->{$getter->name}();
+            return $resource->{$getter}();
         }
 
         return null;
