@@ -7,6 +7,7 @@ use WizardsRest\Annotation\Embeddable;
 use WizardsRest\Annotation\Exposable;
 use Doctrine\Common\Annotations\Reader;
 use WizardsRest\Annotation\Type;
+use Doctrine\ORM\Proxy\Proxy;
 
 /**
  * Reads an object configuration from annotations.
@@ -123,7 +124,7 @@ class DoctrineAnnotationReader implements ObjectReaderInterface
             return $resource->{$getter->name}();
         }
 
-        $property = $reflectionClass->getProperty(strtolower($name));
+        $property = $reflectionClass->getProperty(lcfirst($name));
         $getter = $this->getPropertyGetter($property);
 
         if ($getter) {
