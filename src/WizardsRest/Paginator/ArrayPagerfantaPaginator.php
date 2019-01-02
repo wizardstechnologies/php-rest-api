@@ -13,7 +13,7 @@ use WizardsRest\Parser\RestQueryParser;
 class ArrayPagerfantaPaginator implements PaginatorInterface
 {
     /**
-     * @var Pagerfanta
+     * @var Pagerfanta|null
      */
     private $paginator;
 

@@ -7,9 +7,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 /**
  * Parse the rest query parameters into a reliable array with defaults.
- * Those parameters are useful to manipulate collection.
- *
- * @author Romain Richard
+ * Those parameters are useful to manipulate collection, and are documented in the jsonapi specification.
  */
 class RestQueryParser
 {
@@ -17,6 +15,10 @@ class RestQueryParser
     const PARAMETER_LIMIT = 'limit';
     const PARAMETER_SORT = 'sort';
     const PARAMETER_FILTER = 'filter';
+    /**
+     * This is an extra filtering parameter, not documented in jsonapi, but really useful to filter api requests.
+     * It supports operators such as <, >, <=, >=, !=
+    */
     const PARAMETER_FILTER_OPERATOR = 'filteroperator';
 
     const DEFAULT_PAGE = 1;

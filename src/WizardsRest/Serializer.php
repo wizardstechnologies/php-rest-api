@@ -2,10 +2,6 @@
 
 namespace WizardsRest;
 
-use WizardsRest\ObjectManager\DoctrineOrmObjectManager;
-use WizardsRest\Transformer\EntityTransformer;
-use Psr\Http\Message\ServerRequestInterface;
-use League\Fractal;
 use League\Fractal\Manager;
 use League\Fractal\Serializer\JsonApiSerializer;
 use League\Fractal\Serializer\ArraySerializer;

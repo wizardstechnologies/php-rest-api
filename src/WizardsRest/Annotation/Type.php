@@ -12,7 +12,7 @@ namespace WizardsRest\Annotation;
 class Type
 {
     /**
-     * @var string $type
+     * @var string|null
      */
     private $type;
 
@@ -28,17 +28,11 @@ class Type
         $this->setType(isset($data['value']) ? $data['value'] : null);
     }
 
-    /**
-     * @return string
-     */
-    public function getType()
+    public function getType(): ?string
     {
         return $this->type;
     }
 
-    /**
-     * @param string|null $type
-     */
     public function setType(string $type = null)
     {
         $this->type = $type;

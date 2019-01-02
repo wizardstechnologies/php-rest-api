@@ -3,6 +3,7 @@
 namespace WizardsRest\ObjectReader;
 
 use Doctrine\Common\Util\ClassUtils;
+use phpDocumentor\Reflection\Types\Array_;
 use WizardsRest\Annotation\Embeddable;
 use WizardsRest\Annotation\Exposable;
 use Doctrine\Common\Annotations\Reader;
@@ -32,33 +33,36 @@ class DoctrineAnnotationReader implements ObjectReaderInterface
 
     /**
      * Get a resource name.
+     * This resource reader will first try to read any @Type annotation if present,
+     * or use the reflection short name otherwise.
      *
      * @TODO: We sould have more sources for this: configuration
      * @TODO move from doctrine/common to doctrine/annotation
      *
-     * @param $resource
+     * @param mixed $resource
      *
-     * @return string
+     * @return string|null
      *
      * @throws \ReflectionException
      */
-    public function getResourceName($resource)
+    public function getResourceName($resource): ?string
     {
-        if ($resource instanceof \Traversable && 0 === count($resource)) {
+        // If the resource is an empty collection, return null
+        if ($this->isCollection($resource) && 0 === count($resource)) {
             return null;
         }
 
-        $reflection = $resource instanceof \Traversable
+        $reflection = $this->isCollection($resource)
             ? new \ReflectionClass(ClassUtils::getClass($resource[0]))
             : new \ReflectionClass(ClassUtils::getClass($resource));
 
         /**
-         * @var Type|null $resourceNameAnnotation
+         * @var Type|null $annotation
          */
-        $resourceNameAnnotation = $this->annotationReader->getClassAnnotation($reflection, Type::class);
+        $annotation = $this->annotationReader->getClassAnnotation($reflection, Type::class);
 
-        if (null !== $resourceNameAnnotation) {
-            return $resourceNameAnnotation->getType();
+        if (null !== $annotation) {
+            return $annotation->getType();
         }
 
         return strtolower($reflection->getShortName());
@@ -88,9 +92,14 @@ class DoctrineAnnotationReader implements ObjectReaderInterface
         return null !== $this->annotationReader->getPropertyAnnotation($property, Exposable::class);
     }
 
+    /**
+     * @inheritdoc
+     * Uses reflection to guess all the exposed properties from a given resource.
+     * The filter parameter is here to do the "sparse fieldset" feature.
+     */
     public function getExposedProperties($resource, array $filter)
     {
-        // @TODO we want to have different possible strategies faut exposing properties
+        // @TODO we want to have different possible strategies for exposing properties
         // to include everything or nothing by default (or maybe scalars only ?)
         // as well has having multiple filtering strategies (fields=name,date...) such as all or nothing
         // and deep sparse fieldset (fields=label.name,gigs.date)
@@ -102,10 +111,7 @@ class DoctrineAnnotationReader implements ObjectReaderInterface
             $propertyName = $property->getName();
 
             // current implementation takes everything if fields is unspecified or id + fields if specified
-            if (
-                $this->isPropertyExposable($property) &&
-                (count($filter) > 0 ? in_array($propertyName, $filter) || $propertyName === 'id' : true)
-            ) {
+            if ($this->isPropertyExposable($property) && $this->isPropertyAvailable($propertyName, $filter)) {
                 $propertyList[$propertyName] = $this->processValue($resource->{$this->getPropertyGetter($property)}());
             }
         }
@@ -135,13 +141,17 @@ class DoctrineAnnotationReader implements ObjectReaderInterface
     }
 
     /**
-     * if annotation has a getter property, use that, otherwise use get_*Property*
-     * @TODO document that
+     * If the @Exposablr annotation has a getter property, use that, otherwise use get_*Property*
+     *
      * @param \ReflectionProperty $property
+     *
      * @return string
      */
     private function getPropertyGetter(\ReflectionProperty $property)
     {
+        /**
+         * @var Exposable|null
+         */
         $exposable = $this->annotationReader->getPropertyAnnotation($property, Exposable::class);
 
         if (null !== $exposable && null !== $exposable->getGetter()) {
@@ -152,8 +162,9 @@ class DoctrineAnnotationReader implements ObjectReaderInterface
     }
 
     /**
-     * @TODO: should be configurable via annotation. should be able to process more than dates
-     * @param $value
+     * @TODO: should be configurable via annotation
+     * @TODO: should be able to process more than dates
+     * @param mixed $value
      *
      * @return string
      */
@@ -164,5 +175,30 @@ class DoctrineAnnotationReader implements ObjectReaderInterface
         }
 
         return $value;
+    }
+
+    /**
+     * @param mixed $resource
+     *
+     * @return bool
+     */
+    private function isCollection($resource)
+    {
+        if (is_array($resource) || $resource instanceof \Traversable || $resource instanceof \Countable) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * @param string $propertyName
+     * @param array $filter
+     *
+     * @return bool
+     */
+    private function isPropertyAvailable(string $propertyName, array $filter)
+    {
+        return count($filter) > 0 ? in_array($propertyName, $filter) || $propertyName === 'id' : true;
     }
 }

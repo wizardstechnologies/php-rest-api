@@ -19,7 +19,7 @@ class HttpException extends \RuntimeException
      * HttpException constructor.
      *
      * @param int $statusCode
-     * @param string|null $message
+     * @param string $message
      */
     public function __construct(int $statusCode = 500, string $message = 'Server Error')
     {

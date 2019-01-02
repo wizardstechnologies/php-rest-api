@@ -30,7 +30,7 @@ interface ObjectReaderInterface
     /**
      * Get the list of properties than can be exposed.
      *
-     * @param $resource
+     * @param mixed $resource
      * @param array $filter
      *
      * @return mixed
@@ -39,7 +39,7 @@ interface ObjectReaderInterface
 
     /**
      * Get the value of an object's property.
-     * @param $resource
+     * @param mixed $resource
      * @param string $name
      *
      * @return mixed

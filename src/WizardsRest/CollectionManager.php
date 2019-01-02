@@ -2,11 +2,8 @@
 
 namespace WizardsRest;
 
-use WizardsRest\ObjectManager\DoctrineOrmObjectManager;
 use WizardsRest\ObjectManager\ObjectManagerInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use League\Fractal\Manager;
-use League\Fractal\Pagination\PaginatorInterface as FractalPaginatorInterface;
 use WizardsRest\Paginator\PaginatorInterface;
 
 /**
@@ -19,15 +16,21 @@ use WizardsRest\Paginator\PaginatorInterface;
 class CollectionManager
 {
     /**
-     * @var Manager
+     * @var PaginatorInterface
      */
     private $paginator;
 
     /**
-     * @var DoctrineOrmObjectManager
+     * @var ObjectManagerInterface
      */
     private $objectManager;
 
+    /**
+     * CollectionManager constructor.
+     *
+     * @param PaginatorInterface $paginator
+     * @param ObjectManagerInterface $objectManager
+     */
     public function __construct(PaginatorInterface $paginator, ObjectManagerInterface $objectManager)
     {
         $this->objectManager = $objectManager;

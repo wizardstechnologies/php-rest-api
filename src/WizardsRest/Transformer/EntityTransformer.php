@@ -44,10 +44,7 @@ class EntityTransformer extends TransformerAbstract
         $this->availableIncludes = $includes;
     }
 
-    /**
-     * @param $fields
-     */
-    public function setAvailableFields($fields)
+    public function setAvailableFields(array $fields)
     {
         $this->availableFields = $fields;
     }
@@ -67,12 +64,12 @@ class EntityTransformer extends TransformerAbstract
     /**
      * Dynamic inclusion of included/embedded params.
      *
-     * @param $name
-     * @param $arguments
+     * @param string $name
+     * @param array $arguments
      *
      * @return \League\Fractal\Resource\Collection|\League\Fractal\Resource\Item
      */
-    public function __call($name, $arguments)
+    public function __call(string $name, array $arguments)
     {
         if (0 === strpos($name, 'include') && strlen($name) > strlen('include')) {
             try {
@@ -89,8 +86,8 @@ class EntityTransformer extends TransformerAbstract
     /**
      * Get the include value.
      *
-     * @param $entity
-     * @param $name
+     * @param object $entity
+     * @param string $name
      *
      * @return \League\Fractal\Resource\Collection|\League\Fractal\Resource\Item
      */
