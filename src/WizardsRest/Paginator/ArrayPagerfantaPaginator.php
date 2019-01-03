@@ -29,17 +29,13 @@ class ArrayPagerfantaPaginator implements PaginatorInterface
     
     private function getPaginator($collection, ServerRequestInterface $request)
     {
-        if ($this->paginator) {
-            return $this->paginator;
-        }
-
         $parameters = new RestQueryParser($request);
-        $adapter = new ArrayAdapter($collection->getData());
-        $this->paginator = new Pagerfanta($adapter);
-        $this->paginator->setMaxPerPage($parameters->get(RestQueryParser::PARAMETER_LIMIT));
-        $this->paginator->setCurrentPage($parameters->get(RestQueryParser::PARAMETER_PAGE));
+        $adapter = new ArrayAdapter($collection);
+        $paginator = new Pagerfanta($adapter);
+        $paginator->setMaxPerPage($parameters->get(RestQueryParser::PARAMETER_LIMIT));
+        $paginator->setCurrentPage($parameters->get(RestQueryParser::PARAMETER_PAGE));
         
-        return $this->paginator;
+        return $paginator;
     }
 
     public function paginate($collection, ServerRequestInterface $request)
