@@ -10,6 +10,9 @@ use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\RouterInterface;
 use WizardsRest\Parser\RestQueryParser;
 
+/**
+ * Paginates a Doctrine ORM Query or a QueryBuilder according to an http request.
+ */
 class DoctrineOrmPagerFantaPaginator implements PaginatorInterface
 {
     /**

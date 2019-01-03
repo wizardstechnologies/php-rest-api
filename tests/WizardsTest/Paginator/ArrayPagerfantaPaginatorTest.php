@@ -2,6 +2,7 @@
 
 namespace WizardsTest\Paginator;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Routing\Router;
 use WizardsRest\Paginator\ArrayPagerfantaPaginator;
@@ -34,5 +35,19 @@ class ArrayPagerfantaPaginatorTest extends TestCase
             [RestQueryParser::PARAMETER_LIMIT => '5']
         );
         $this->assertEquals(5, count($paginator->paginate($collection, $request2)));
+    }
+
+    public function testPaginateCollection()
+    {
+        $routerMock = $this->createMock(Router::class);
+        $paginator = new ArrayPagerfantaPaginator($routerMock);
+        $collection = new ArrayCollection([1, 2, 3, 4, 5]);
+        $request = new ServerRequest(
+            [],
+            [],
+            '/posts',
+            'GET'
+        );
+        $this->assertEquals(5, count($paginator->paginate($collection, $request)));
     }
 }
