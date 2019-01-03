@@ -12,7 +12,7 @@ namespace WizardsRest\Annotation;
 class Exposable
 {
     /**
-     * @var string $getter
+     * @var string|null $getter
      */
     private $getter;
 
@@ -28,17 +28,11 @@ class Exposable
         $this->setGetter(isset($data['value']) ? $data['value'] : null);
     }
 
-    /**
-     * @return string
-     */
-    public function getGetter()
+    public function getGetter(): ?string
     {
         return $this->getter;
     }
 
-    /**
-     * @param string $getter
-     */
     public function setGetter(string $getter = null)
     {
         $this->getter = $getter;

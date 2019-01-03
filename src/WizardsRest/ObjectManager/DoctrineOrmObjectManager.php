@@ -3,6 +3,8 @@
 namespace WizardsRest\ObjectManager;
 
 use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Doctrine\ORM\QueryBuilder;
 use Psr\Http\Message\ServerRequestInterface;
 use WizardsRest\Parser\RestQueryParser;
@@ -46,45 +48,58 @@ class DoctrineOrmObjectManager implements ObjectManagerInterface
      *
      * @return QueryBuilder
      */
-    private function findAllSorted($className, array $sorting = [], array $filterValues = [], array $filerOperators = [])
-    {
-        $fields = array_keys($this->objectManager->getClassMetadata($className)->getReflectionProperties());
+    private function findAllSorted(
+        $className,
+        array $sorting = [],
+        array $filterValues = [],
+        array $filerOperators = []
+    ) {
+        /**
+         * @var ClassMetadataInfo $metaData
+         */
+        $metaData = $this->objectManager->getClassMetadata($className);
+        $fields = array_keys($metaData->getReflectionProperties());
+
+        /**
+         * @var EntityRepository
+         */
         $repository = $this->objectManager->getRepository($className);
 
         // If user's own implementation is defined, use it
-        try {
+        if (method_exists($repository, 'findAllSorted')) {
             return $repository->findAllSorted($sorting, $filterValues, $filerOperators);
-        } catch (\BadMethodCallException $exception) {
-            $queryBuilder = $repository->createQueryBuilder('e');
-
-            foreach ($sorting as $name => $direction) {
-                if (in_array($name, $fields)) {
-                    $queryBuilder->addOrderBy('e.' . $name, $direction);
-                }
-            }
-
-            // @TODO: multiple sub filters on fields like
-            // ?filers[cards.amount]=100&filter[cards.userdId]=1&fileroperatos[cards.amount]=>=
-            // right now we can only filter on sub resources by id
-            foreach ($fields as $field) {
-                $value = $this->getFilterValue($filterValues, $field);
-                if (null !== $value) {
-                    $operator = $this->getFilterOperator($filerOperators, $field);
-                    $field = $this->getFilterField($filterValues, $field);
-                    $queryBuilder->andWhere(sprintf("e.%s%s'%s'", $field, $operator, $value));
-                }
-            }
-
-            return $queryBuilder;
         }
+
+        $queryBuilder = $repository->createQueryBuilder('e');
+
+        foreach ($sorting as $name => $direction) {
+            if (in_array($name, $fields)) {
+                $queryBuilder->addOrderBy('e.' . $name, $direction);
+            }
+        }
+
+        // @TODO: multiple sub filters on fields like
+        // ?filers[cards.amount]=100&filter[cards.userId]=1&fileroperator[cards.amount]=>=
+        // right now we can only filter on sub resources by id
+        foreach ($fields as $field) {
+            $value = $this->getFilterValue($filterValues, $field);
+            if (null !== $value) {
+                $operator = $this->getFilterOperator($filerOperators, $field);
+                $field = $this->getFilterField($filterValues, $field);
+                $queryBuilder->andWhere(sprintf("e.%s%s'%s'", $field, $operator, $value));
+            }
+        }
+
+        return $queryBuilder;
     }
 
     /**
-     * @param $filterValues
-     * @param $field
+     * @param array $filterValues
+     * @param string $field
+     *
      * @return string|null
      */
-    private function getFilterValue($filterValues, $field)
+    private function getFilterValue(array $filterValues, string $field)
     {
         foreach ($filterValues as $filterName => $filterValue) {
             $subsets = explode('.', $filterName);
@@ -96,7 +111,13 @@ class DoctrineOrmObjectManager implements ObjectManagerInterface
         return null;
     }
 
-    private function getFilterField($filterValues, $field)
+    /**
+     * @param array $filterValues
+     * @param string $field
+     *
+     * @return string|null
+     */
+    private function getFilterField(array $filterValues, string $field)
     {
         foreach (array_keys($filterValues) as $filterName) {
             $subsets = explode('.', $filterName);
@@ -108,7 +129,13 @@ class DoctrineOrmObjectManager implements ObjectManagerInterface
         return null;
     }
 
-    private function getFilterOperator($filerOperators, $field)
+    /**
+     * @param array $filerOperators
+     * @param string $field
+     *
+     * @return string
+     */
+    private function getFilterOperator(array $filerOperators, string $field)
     {
         $allowedFilters = ['>', '<', '>=', '<=', '=', '!='];
 
