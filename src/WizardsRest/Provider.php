@@ -46,19 +46,17 @@ class Provider
     /**
      * Transforms an entity or a collection in a Fractal Resource.
      *
-     * @param object|array $entity
-     * @param ServerRequestInterface $request
-     * @param Fractal\TransformerAbstract|null $userTransformer
-     * @param string|null $name
+     * @param object|array                              $entity
+     * @param ServerRequestInterface                    $request
+     * @param Fractal\TransformerAbstract|callable|null $userTransformer
+     * @param string|null                               $name
      *
      * @return Fractal\Resource\Collection|Fractal\Resource\Item
-     *
-     * @throws \ReflectionException
      */
     public function transform(
         $entity,
         ServerRequestInterface $request,
-        Fractal\TransformerAbstract $userTransformer = null,
+        $userTransformer = null,
         string $name = null
     ): ResourceAbstract {
         $this->manager->parseIncludes($this->getComaSeparatedQueryParams($request, 'include'));
