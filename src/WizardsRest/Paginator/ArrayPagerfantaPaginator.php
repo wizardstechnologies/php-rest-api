@@ -2,6 +2,7 @@
 
 namespace WizardsRest\Paginator;
 
+use Doctrine\Common\Collections\Collection;
 use League\Fractal\Pagination\PagerfantaPaginatorAdapter;
 use League\Fractal\Pagination\PaginatorInterface as FractalPaginatorInterface;
 use Pagerfanta\Adapter\ArrayAdapter;
@@ -10,13 +11,11 @@ use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\RouterInterface;
 use WizardsRest\Parser\RestQueryParser;
 
+/**
+ * Paginate an array or an ArrayCollection using PagerFanta.
+ */
 class ArrayPagerfantaPaginator implements PaginatorInterface
 {
-    /**
-     * @var Pagerfanta|null
-     */
-    private $paginator;
-
     /**
      * @var RouterInterface
      */
@@ -26,9 +25,13 @@ class ArrayPagerfantaPaginator implements PaginatorInterface
     {
         $this->router = $router;
     }
-    
+
     private function getPaginator($collection, ServerRequestInterface $request)
     {
+        if ($collection instanceof Collection) {
+            $collection = $collection->toArray();
+        }
+
         $parameters = new RestQueryParser($request);
         $adapter = new ArrayAdapter($collection);
         $paginator = new Pagerfanta($adapter);

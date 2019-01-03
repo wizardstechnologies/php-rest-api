@@ -52,7 +52,10 @@ class RestQueryParserTest extends TestCase
         $this->assertEquals(RestQueryParser::DEFAULT_PAGE, $parser->get(RestQueryParser::PARAMETER_PAGE));
         $this->assertEquals(RestQueryParser::DEFAULT_SORT, $parser->get(RestQueryParser::PARAMETER_SORT));
         $this->assertEquals(RestQueryParser::DEFAULT_FILTER, $parser->get(RestQueryParser::PARAMETER_FILTER));
-        $this->assertEquals(RestQueryParser::DEFAULT_FILTER_OPERATOR, $parser->get(RestQueryParser::PARAMETER_FILTER_OPERATOR));
+        $this->assertEquals(
+            RestQueryParser::DEFAULT_FILTER_OPERATOR,
+            $parser->get(RestQueryParser::PARAMETER_FILTER_OPERATOR)
+        );
         $this->assertEquals(null, $parser->get('unused'));
     }
 
