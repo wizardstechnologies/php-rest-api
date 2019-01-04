@@ -12,7 +12,12 @@ use Psr\Http\Message\ServerRequestInterface;
 interface ObjectManagerInterface
 {
     /**
-     * Get the actual collection of the request for a className
+     * Get the actual collection of the request for a given source.
+     *
+     * @param mixed                  $source
+     * @param ServerRequestInterface $request
+     *
+     * @return mixed
      */
-    public function fetchCollection(string $className, ServerRequestInterface $request);
+    public function fetchCollection($source, ServerRequestInterface $request);
 }

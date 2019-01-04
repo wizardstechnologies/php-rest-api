@@ -28,12 +28,20 @@ class DoctrineOrmObjectManager implements ObjectManagerInterface
         $this->objectManager = $objectManager;
     }
 
-    public function fetchCollection(string $className, ServerRequestInterface $request)
+    /**
+     * Get the actual collection of the request for a given source.
+     *
+     * @param string                 $source The class name of the entity.
+     * @param ServerRequestInterface $request
+     *
+     * @return mixed
+     */
+    public function fetchCollection($source, ServerRequestInterface $request)
     {
         $parameters = new RestQueryParser($request);
 
         return $this->findAllSorted(
-            $className,
+            $source,
             $parameters->getParsedSorting(),
             $parameters->get(RestQueryParser::PARAMETER_FILTER),
             $parameters->get(RestQueryParser::PARAMETER_FILTER_OPERATOR)
