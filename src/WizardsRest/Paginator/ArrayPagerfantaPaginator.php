@@ -21,6 +21,11 @@ class ArrayPagerfantaPaginator implements PaginatorInterface
      */
     private $router;
 
+    /**
+     * @var Pagerfanta
+     */
+    private $paginator;
+
     public function __construct(RouterInterface $router)
     {
         $this->router = $router;
@@ -34,11 +39,12 @@ class ArrayPagerfantaPaginator implements PaginatorInterface
 
         $parameters = new RestQueryParser($request);
         $adapter = new ArrayAdapter($collection);
-        $paginator = new Pagerfanta($adapter);
-        $paginator->setMaxPerPage($parameters->get(RestQueryParser::PARAMETER_LIMIT));
-        $paginator->setCurrentPage($parameters->get(RestQueryParser::PARAMETER_PAGE));
-        
-        return $paginator;
+
+        $this->paginator = new Pagerfanta($adapter);
+        $this->paginator->setMaxPerPage($parameters->get(RestQueryParser::PARAMETER_LIMIT));
+        $this->paginator->setCurrentPage($parameters->get(RestQueryParser::PARAMETER_PAGE));
+
+        return $this->paginator;
     }
 
     public function paginate($collection, ServerRequestInterface $request)
@@ -52,7 +58,7 @@ class ArrayPagerfantaPaginator implements PaginatorInterface
         $attributes = $request->getAttributes();
 
         return new PagerfantaPaginatorAdapter(
-            $this->getPaginator($collection, $request),
+            $this->paginator,
             function (int $page) use ($request, $attributes, $router) {
                 $route = $attributes['_route'];
                 $inputParams = $attributes['_route_params'];
