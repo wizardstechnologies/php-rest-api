@@ -8,10 +8,6 @@ use WizardsRest\Paginator\PaginatorInterface;
 
 /**
  * A service to help you fetch a collection according to query params
- *
- * @package WizardsRest
- *
- * @author Romain Richard
  */
 class CollectionManager
 {
@@ -26,8 +22,6 @@ class CollectionManager
     private $objectManager;
 
     /**
-     * CollectionManager constructor.
-     *
      * @param PaginatorInterface $paginator
      * @param ObjectManagerInterface $objectManager
      */
@@ -39,9 +33,27 @@ class CollectionManager
 
     /**
      * Fetches a paginated collection from the object manager.
+     * Don't use it in combination with wizards-rest-bundle as you would do the pagination twice.
+     * Prefer getFilteredCollection.
+     *
+     * @param string $className
+     * @param ServerRequestInterface $request
+     *
+     * @return \Traversable
      */
     public function getPaginatedCollection(string $className, ServerRequestInterface $request): \Traversable
     {
         return $this->paginator->paginate($this->objectManager->fetchCollection($className, $request), $request);
+    }
+
+    /**
+     * @param mixed                  $source
+     * @param ServerRequestInterface $request
+     *
+     * @return \Traversable|array
+     */
+    public function getFilteredCollection($source, ServerRequestInterface $request)
+    {
+        return $this->objectManager->fetchCollection($source, $request);
     }
 }
