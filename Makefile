@@ -10,6 +10,7 @@ analysis:
 	$(PHPSTAN_BIN) analyse src --level=7
 	$(PHPCS_BIN) --standard=PSR2 src
 	$(PHPCS_BIN) --standard=PSR2 tests
+	$(PHPMD_BIN) src text cleancode,codesize,controversial,design,naming,unusedcode
 
 test:
 	$(PHPUNIT_BIN)
