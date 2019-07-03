@@ -67,7 +67,7 @@ class EntityTransformer extends TransformerAbstract
      * @param string $name
      * @param array $arguments
      *
-     * @return \League\Fractal\Resource\Collection|\League\Fractal\Resource\Item
+     * @return \League\Fractal\Resource\Collection|\League\Fractal\Resource\Item|null
      */
     public function __call(string $name, array $arguments)
     {
@@ -89,11 +89,15 @@ class EntityTransformer extends TransformerAbstract
      * @param object $entity
      * @param string $name
      *
-     * @return \League\Fractal\Resource\Collection|\League\Fractal\Resource\Item
+     * @return \League\Fractal\Resource\Collection|\League\Fractal\Resource\Item|null
      */
     private function includeResource($entity, $name)
     {
         $resource = $this->objectReader->getPropertyValue($entity, $name);
+
+        if (!$resource) {
+            return null;
+        }
 
         if (is_array($resource) || $resource instanceof \Traversable) {
             return $this->collection($resource, $this, $this->objectReader->getResourceName($resource));
