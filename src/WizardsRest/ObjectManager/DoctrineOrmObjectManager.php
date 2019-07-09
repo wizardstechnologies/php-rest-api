@@ -52,7 +52,7 @@ class DoctrineOrmObjectManager implements ObjectManagerInterface
      * @param string $className
      * @param array  $sorting
      * @param array  $filterValues
-     * @param array  $filerOperators
+     * @param array  $filterOperators
      *
      * @return QueryBuilder
      */
@@ -60,7 +60,7 @@ class DoctrineOrmObjectManager implements ObjectManagerInterface
         $className,
         array $sorting = [],
         array $filterValues = [],
-        array $filerOperators = []
+        array $filterOperators = []
     ) {
         /**
          * @var ClassMetadataInfo $metaData
@@ -75,7 +75,7 @@ class DoctrineOrmObjectManager implements ObjectManagerInterface
 
         // If user's own implementation is defined, use it
         if (method_exists($repository, 'findAllSorted')) {
-            return $repository->findAllSorted($sorting, $filterValues, $filerOperators);
+            return $repository->findAllSorted($sorting, $filterValues, $filterOperators);
         }
 
         $queryBuilder = $repository->createQueryBuilder('e');
@@ -86,19 +86,77 @@ class DoctrineOrmObjectManager implements ObjectManagerInterface
             }
         }
 
-        // @TODO: multiple sub filters on fields like
-        // ?filers[cards.amount]=100&filter[cards.userId]=1&fileroperator[cards.amount]=>=
-        // right now we can only filter on sub resources by id
         foreach ($fields as $field) {
             $value = $this->getFilterValue($filterValues, $field);
+
             if (null !== $value) {
-                $operator = $this->getFilterOperator($filerOperators, $field);
-                $field = $this->getFilterField($filterValues, $field);
+                $operator = $this->getFilterOperator($filterOperators, $field);
                 $queryBuilder->andWhere(sprintf("e.%s%s'%s'", $field, $operator, $value));
+            }
+
+            $values = $this->getSubFiltersValues($filterValues, $field);
+
+            if (count($values)) {
+                $associationMapping = $metaData->getAssociationMapping($field);
+                $relationMetaData = $this->objectManager->getClassMetadata($associationMapping['targetEntity']);
+                $validatedValues = $this->getValidatedValues($relationMetaData, $values);
+                $this->addSubFilters($queryBuilder, $field, $values, $filterOperators);
             }
         }
 
         return $queryBuilder;
+    }
+
+    /**
+    * @param ClassMetadataInfo $metaData
+    * @param array $values
+    */
+    private function getValidatedValues($metaData, $values) {
+      $fields = array_keys($metaData->getReflectionProperties());
+      $validatedValues = [];
+
+      foreach ($fields as $field) {
+          if (isset($values[$field])) {
+              $validatedValues[$field] = $values[$field];
+          }
+      }
+
+      return $validatedValues;
+    }
+
+    /**
+     * @param QueryBuilder $queryBuilder
+     * @param string $field
+     * @param array $values
+     * @param array $filterOperators
+     */
+    private function addSubFilters($queryBuilder, $field, $values, $filterOperators) {
+        if (count($values)) {
+          $queryBuilder->innerJoin('e.'.$field, $field);
+          foreach ($values as $subFieldName => $subFieldValue) {
+            $operator = $this->getFilterOperator($filterOperators, $field.'.'.$subFieldName);
+            $whereString = sprintf("%s.%s%s'%s'", $field, $subFieldName, $operator, $subFieldValue);
+            $queryBuilder->andWhere($whereString);
+          }
+        }
+    }
+
+    /**
+     * @param array $filterValues
+     * @param string $field
+     *
+     * @return array
+     */
+    private function getSubFiltersValues(array $filterValues, string $field)
+    {
+        $subFiltersValues = [];
+        foreach ($filterValues as $filterName => $filterValue) {
+            $subsets = explode('.', $filterName);
+            if ($field == $subsets[0] && isset($subsets[1])) {
+                $subFiltersValues[$subsets[1]] = $filterValue;
+            }
+        }
+        return $subFiltersValues;
     }
 
     /**
@@ -109,46 +167,24 @@ class DoctrineOrmObjectManager implements ObjectManagerInterface
      */
     private function getFilterValue(array $filterValues, string $field)
     {
-        foreach ($filterValues as $filterName => $filterValue) {
-            $subsets = explode('.', $filterName);
-            if ($field == $subsets[0]) {
-                return $filterValue;
-            }
+        if (isset($filterValues[$field])) {
+            return $filterValues[$field];
         }
-
         return null;
     }
 
-    /**
-     * @param array $filterValues
-     * @param string $field
-     *
-     * @return string|null
-     */
-    private function getFilterField(array $filterValues, string $field)
-    {
-        foreach (array_keys($filterValues) as $filterName) {
-            $subsets = explode('.', $filterName);
-            if ($field == $subsets[0]) {
-                return $subsets[0];
-            }
-        }
-
-        return null;
-    }
 
     /**
-     * @param array $filerOperators
+     * @param array $filterOperators
      * @param string $field
      *
      * @return string
      */
-    private function getFilterOperator(array $filerOperators, string $field)
+    private function getFilterOperator(array $filterOperators, string $field)
     {
         $allowedFilters = ['>', '<', '>=', '<=', '=', '!='];
-
-        if (isset($filerOperators[$field]) && in_array($filerOperators[$field], $allowedFilters)) {
-            return $filerOperators[$field];
+        if (isset($filterOperators[$field]) && in_array($filterOperators[$field], $allowedFilters)) {
+            return $filterOperators[$field];
         }
 
         return '=';
