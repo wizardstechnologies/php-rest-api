@@ -16,6 +16,7 @@
   },
   "require-dev": {
     "pagerfanta/pagerfanta": "^2.0",
+    "doctrine/annotations": "^1.7",
     "doctrine/orm": "^2.6",
     "doctrine/common": "^2.9",
     "symfony/routing": "^4.1",

@@ -2,7 +2,6 @@
 
 namespace WizardsRest\ObjectReader;
 
-use Doctrine\Common\Util\ClassUtils;
 use WizardsRest\Annotation\Embeddable;
 use WizardsRest\Annotation\Exposable;
 use Doctrine\Common\Annotations\Reader;
@@ -38,7 +37,6 @@ class DoctrineAnnotationReader implements ObjectReaderInterface
      * or use the reflection short name otherwise.
      *
      * @TODO: We sould have more sources for this: configuration
-     * @TODO move from doctrine/common to doctrine/annotation
      *
      * @param mixed $resource
      *
@@ -54,8 +52,8 @@ class DoctrineAnnotationReader implements ObjectReaderInterface
         }
 
         $reflection = $this->isCollection($resource)
-            ? new ReflectionClass(ClassUtils::getClass($resource[0]))
-            : new ReflectionClass(ClassUtils::getClass($resource));
+            ? new ReflectionClass($this->getClassName($resource[0]))
+            : new ReflectionClass($this->getClassName($resource));
 
         /**
          * @var Type|null $annotation
@@ -106,8 +104,7 @@ class DoctrineAnnotationReader implements ObjectReaderInterface
         // and deep sparse fieldset (fields=label.name,gigs.date)
 
         $propertyList = [];
-        // @TODO move from doctrine/common to doctrine/reflection
-        $reflectionClass = new ReflectionClass(ClassUtils::getClass($resource));
+        $reflectionClass = new ReflectionClass($this->getClassName($resource));
         foreach ($reflectionClass->getProperties() as $property) {
             $propertyName = $property->getName();
 
@@ -201,5 +198,25 @@ class DoctrineAnnotationReader implements ObjectReaderInterface
     private function isPropertyAvailable(string $propertyName, array $filter)
     {
         return count($filter) > 0 ? in_array($propertyName, $filter) || $propertyName === 'id' : true;
+    }
+
+    /**
+     * Gets the real class name of a class name that could be a proxy.
+     *
+     * @param object $resource
+     *
+     * @return string
+     */
+    private function getClassName($resource)
+    {
+        $class = get_class($resource);
+        $marker = '__CG__';
+        $markerPosition = strrpos($marker, '\\' . $marker . '\\');
+
+        if (false === $markerPosition) {
+            return $class;
+        }
+
+        return substr($class, $markerPosition + strlen($marker) + 2);
     }
 }
