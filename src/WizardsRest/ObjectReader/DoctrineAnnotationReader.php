@@ -3,12 +3,13 @@
 namespace WizardsRest\ObjectReader;
 
 use Doctrine\Common\Util\ClassUtils;
-use phpDocumentor\Reflection\Types\Array_;
 use WizardsRest\Annotation\Embeddable;
 use WizardsRest\Annotation\Exposable;
 use Doctrine\Common\Annotations\Reader;
 use WizardsRest\Annotation\Type;
 use Doctrine\ORM\Proxy\Proxy;
+use \ReflectionClass;
+use \ReflectionProperty;
 
 /**
  * Reads an object configuration from annotations.
@@ -53,8 +54,8 @@ class DoctrineAnnotationReader implements ObjectReaderInterface
         }
 
         $reflection = $this->isCollection($resource)
-            ? new \ReflectionClass(ClassUtils::getClass($resource[0]))
-            : new \ReflectionClass(ClassUtils::getClass($resource));
+            ? new ReflectionClass(ClassUtils::getClass($resource[0]))
+            : new ReflectionClass(ClassUtils::getClass($resource));
 
         /**
          * @var Type|null $annotation
@@ -106,7 +107,7 @@ class DoctrineAnnotationReader implements ObjectReaderInterface
 
         $propertyList = [];
         // @TODO move from doctrine/common to doctrine/reflection
-        $reflectionClass = new \ReflectionClass(ClassUtils::getClass($resource));
+        $reflectionClass = new ReflectionClass(ClassUtils::getClass($resource));
         foreach ($reflectionClass->getProperties() as $property) {
             $propertyName = $property->getName();
 
@@ -121,7 +122,7 @@ class DoctrineAnnotationReader implements ObjectReaderInterface
 
     public function getPropertyValue($resource, string $name)
     {
-        $reflectionClass = new \ReflectionClass($resource);
+        $reflectionClass = new ReflectionClass($resource);
 
         if ($resource instanceof Proxy) {
             $getterMethod = 'get'.ucfirst($name);
@@ -141,13 +142,13 @@ class DoctrineAnnotationReader implements ObjectReaderInterface
     }
 
     /**
-     * If the @Exposablr annotation has a getter property, use that, otherwise use get_*Property*
+     * If the @Exposable annotation has a getter property, use that, otherwise use get_*Property*
      *
      * @param \ReflectionProperty $property
      *
      * @return string
      */
-    private function getPropertyGetter(\ReflectionProperty $property)
+    private function getPropertyGetter(ReflectionProperty $property)
     {
         /**
          * @var Exposable|null

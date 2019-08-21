@@ -100,7 +100,7 @@ class DoctrineOrmObjectManager implements ObjectManagerInterface
                 $associationMapping = $metaData->getAssociationMapping($field);
                 $relationMetaData = $this->objectManager->getClassMetadata($associationMapping['targetEntity']);
                 $validatedValues = $this->getValidatedValues($relationMetaData, $values);
-                $this->addSubFilters($queryBuilder, $field, $values, $filterOperators);
+                $this->addSubFilters($queryBuilder, $field, $validatedValues, $filterOperators);
             }
         }
 
@@ -108,20 +108,23 @@ class DoctrineOrmObjectManager implements ObjectManagerInterface
     }
 
     /**
-    * @param ClassMetadataInfo $metaData
-    * @param array $values
+     * @param mixed $metaData
+     * @param array $values
+     *
+     * @return array
     */
-    private function getValidatedValues($metaData, $values) {
-      $fields = array_keys($metaData->getReflectionProperties());
-      $validatedValues = [];
+    private function getValidatedValues($metaData, $values)
+    {
+        $fields = array_keys($metaData->getReflectionProperties());
+        $validatedValues = [];
 
-      foreach ($fields as $field) {
-          if (isset($values[$field])) {
-              $validatedValues[$field] = $values[$field];
-          }
-      }
+        foreach ($fields as $field) {
+            if (isset($values[$field])) {
+                $validatedValues[$field] = $values[$field];
+            }
+        }
 
-      return $validatedValues;
+        return $validatedValues;
     }
 
     /**
@@ -130,14 +133,16 @@ class DoctrineOrmObjectManager implements ObjectManagerInterface
      * @param array $values
      * @param array $filterOperators
      */
-    private function addSubFilters($queryBuilder, $field, $values, $filterOperators) {
+    private function addSubFilters($queryBuilder, $field, $values, $filterOperators)
+    {
         if (count($values)) {
-          $queryBuilder->innerJoin('e.'.$field, $field);
-          foreach ($values as $subFieldName => $subFieldValue) {
-            $operator = $this->getFilterOperator($filterOperators, $field.'.'.$subFieldName);
-            $whereString = sprintf("%s.%s%s'%s'", $field, $subFieldName, $operator, $subFieldValue);
-            $queryBuilder->andWhere($whereString);
-          }
+            $queryBuilder->innerJoin('e.' . $field, $field);
+
+            foreach ($values as $subFieldName => $subFieldValue) {
+                $operator = $this->getFilterOperator($filterOperators, $field . '.' . $subFieldName);
+                $whereString = sprintf("%s.%s%s'%s'", $field, $subFieldName, $operator, $subFieldValue);
+                $queryBuilder->andWhere($whereString);
+            }
         }
     }
 

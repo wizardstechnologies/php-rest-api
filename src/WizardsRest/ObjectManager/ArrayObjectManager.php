@@ -2,10 +2,6 @@
 
 namespace WizardsRest\ObjectManager;
 
-use Doctrine\Common\Persistence\ObjectManager;
-use Doctrine\ORM\EntityRepository;
-use Doctrine\ORM\Mapping\ClassMetadataInfo;
-use Doctrine\ORM\QueryBuilder;
 use Psr\Http\Message\ServerRequestInterface;
 use WizardsRest\Parser\RestQueryParser;
 
@@ -56,28 +52,7 @@ class ArrayObjectManager implements ObjectManagerInterface
         // filter out results
         if ($filterValues) {
             $result = array_filter($source, function ($resource) use ($filterValues, $filerOperators) {
-                foreach ($resource as $fieldName => $fieldValue) {
-                    if (isset($filterValues[$fieldName])) {
-                        if (isset($filerOperators[$fieldName])) {
-                            switch ($filerOperators[$fieldName]) {
-                                case '>':
-                                    return $fieldValue > $filterValues[$fieldName];
-                                case '<':
-                                    return $fieldValue < $filterValues[$fieldName];
-                                case '>=':
-                                    return $fieldValue >= $filterValues[$fieldName];
-                                case '<=':
-                                    return $fieldValue <= $filterValues[$fieldName];
-                                case '!=':
-                                    return $fieldValue != $filterValues[$fieldName];
-                            }
-                        }
-
-                        return $fieldValue == $filterValues[$fieldName];
-                    }
-                }
-
-                return false;
+                return $this->filterResults($resource, $filterValues, $filerOperators);
             });
         }
 
@@ -101,5 +76,31 @@ class ArrayObjectManager implements ObjectManagerInterface
         }
 
         return $finalResult;
+    }
+
+    private function filterResults($resource, $filterValues, $filerOperators)
+    {
+        foreach ($resource as $fieldName => $fieldValue) {
+            if (isset($filterValues[$fieldName])) {
+                if (isset($filerOperators[$fieldName])) {
+                    switch ($filerOperators[$fieldName]) {
+                        case '>':
+                            return $fieldValue > $filterValues[$fieldName];
+                        case '<':
+                            return $fieldValue < $filterValues[$fieldName];
+                        case '>=':
+                            return $fieldValue >= $filterValues[$fieldName];
+                        case '<=':
+                            return $fieldValue <= $filterValues[$fieldName];
+                        case '!=':
+                            return $fieldValue != $filterValues[$fieldName];
+                    }
+                }
+
+                return $fieldValue == $filterValues[$fieldName];
+            }
+        }
+
+        return false;
     }
 }

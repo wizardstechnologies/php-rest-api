@@ -4,20 +4,14 @@ namespace WizardsTest\Parser;
 
 use PHPUnit\Framework\TestCase;
 use WizardsRest\Parser\RestQueryParser;
-use Zend\Diactoros\ServerRequest;
+use Nyholm\Psr7\ServerRequest;
 
 class RestQueryParserTest extends TestCase
 {
     public function testGet()
     {
-        $request = new ServerRequest(
-            [],
-            [],
-            '/posts',
-            'GET',
-            'php://input',
-            [],
-            [],
+        $request = new ServerRequest('GET', '/posts');
+        $request = $request->withQueryParams(
             [
                 RestQueryParser::PARAMETER_LIMIT => '5',
                 RestQueryParser::PARAMETER_PAGE => '2',
@@ -40,12 +34,7 @@ class RestQueryParserTest extends TestCase
 
     public function testGetDefaults()
     {
-        $request = new ServerRequest(
-            [],
-            [],
-            '/posts',
-            'GET'
-        );
+        $request = new ServerRequest('GET', '/posts');
         $parser = new RestQueryParser($request);
 
         $this->assertEquals(RestQueryParser::DEFAULT_LIMIT, $parser->get(RestQueryParser::PARAMETER_LIMIT));
@@ -61,14 +50,8 @@ class RestQueryParserTest extends TestCase
 
     public function testParseSorting()
     {
-        $request = new ServerRequest(
-            [],
-            [],
-            '/posts',
-            'GET',
-            'php://input',
-            [],
-            [],
+        $request = new ServerRequest('GET', '/posts');
+        $request = $request->withQueryParams(
             [RestQueryParser::PARAMETER_SORT => 'name,-test,value']
         );
         $parser = new RestQueryParser($request);
