@@ -35,7 +35,9 @@ The _RestQueryParser_ will expect those query parameters:
 - Single resource
 	- `include` to include relationships data. Example: `/books/1?include=author,editor`
 
-### Plain ol' PHP exemple
+## Examples
+
+### Plain ol' PHP
 
 ```php
 <?php
@@ -50,6 +52,7 @@ use WizardsRest\Serializer;
 use WizardsRest\ObjectReader\ArrayReader;
 use WizardsRest\Paginator\ArrayPagerfantaPaginator;
 use Symfony\Component\Routing\RouterInterface;
+use WizardsRest\Transformer\ArrayTransformer;
 
 Class BookController {
     private $source = [
@@ -68,7 +71,7 @@ Class BookController {
         // Transform
         $fractalManager = new \League\Fractal\Manager();
         $reader = new ArrayReader();
-        $provider = new Provider(null, $fractalManager, $reader);
+        $provider = new Provider(new ArrayTransformer(), $fractalManager, $reader);
         $resource = $provider->transform($collection, $request, null, 'books');
         
         // Serialize

@@ -7,7 +7,7 @@ use WizardsRest\Annotation\Exposable;
 use Doctrine\Common\Annotations\Reader;
 
 /**
- * Reads an object configuration from an array
+ * Reads an object configuration from a very simple array.
  *
  * @author Romain Richard
  */
@@ -18,7 +18,7 @@ class ArrayReader implements ObjectReaderInterface
      */
     public function getResourceName($resource)
     {
-        return 'coucou';
+        return 'useless_for_simple_arrays';
     }
 
     /**

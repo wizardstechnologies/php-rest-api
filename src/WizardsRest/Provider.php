@@ -34,7 +34,7 @@ class Provider
     private $reader;
 
     public function __construct(
-        EntityTransformer $defaultTransformer,
+        Fractal\TransformerAbstract $defaultTransformer,
         Manager $manager,
         ObjectReaderInterface $reader
     ) {

@@ -39,9 +39,9 @@ class CollectionManager
      * @param mixed $source Can be an array or a classname
      * @param ServerRequestInterface $request
      *
-     * @return \Traversable
+     * @return iterable
      */
-    public function getPaginatedCollection($source, ServerRequestInterface $request): \Traversable
+    public function getPaginatedCollection($source, ServerRequestInterface $request): iterable
     {
         return $this->paginator->paginate($this->objectManager->fetchCollection($source, $request), $request);
     }
@@ -50,7 +50,7 @@ class CollectionManager
      * @param mixed                  $source
      * @param ServerRequestInterface $request
      *
-     * @return \Traversable|array
+     * @return iterable
      */
     public function getFilteredCollection($source, ServerRequestInterface $request)
     {
