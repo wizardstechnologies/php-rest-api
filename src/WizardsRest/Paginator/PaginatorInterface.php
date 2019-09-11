@@ -16,7 +16,7 @@ interface PaginatorInterface
     /**
      * Get a slice of the results according to an http request.
      *
-     * @param \Traversable $collection
+     * @param iterable $collection
      * @param ServerRequestInterface $request
      *
      * @return mixed
@@ -27,7 +27,7 @@ interface PaginatorInterface
      * Get the informations on the pagination (current page, total results...) according to the current collection
      * and an http request.
      *
-     * @param \Traversable $collection
+     * @param iterable $collection
      * @param ServerRequestInterface $request
      *
      * @return FractalPaginatorInterface

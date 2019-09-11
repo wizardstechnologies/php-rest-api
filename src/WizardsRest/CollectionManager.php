@@ -36,21 +36,21 @@ class CollectionManager
      * Don't use it in combination with wizards-rest-bundle as you would do the pagination twice.
      * Prefer getFilteredCollection.
      *
-     * @param string $className
+     * @param mixed $source Can be an array or a classname
      * @param ServerRequestInterface $request
      *
-     * @return \Traversable
+     * @return iterable
      */
-    public function getPaginatedCollection(string $className, ServerRequestInterface $request): \Traversable
+    public function getPaginatedCollection($source, ServerRequestInterface $request): iterable
     {
-        return $this->paginator->paginate($this->objectManager->fetchCollection($className, $request), $request);
+        return $this->paginator->paginate($this->objectManager->fetchCollection($source, $request), $request);
     }
 
     /**
      * @param mixed                  $source
      * @param ServerRequestInterface $request
      *
-     * @return \Traversable|array
+     * @return iterable
      */
     public function getFilteredCollection($source, ServerRequestInterface $request)
     {

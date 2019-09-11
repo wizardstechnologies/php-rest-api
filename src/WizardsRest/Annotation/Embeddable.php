@@ -2,6 +2,8 @@
 
 namespace WizardsRest\Annotation;
 
+use \BadMethodCallException;
+
 /**
  * Tell the serializer if a property embeddable in a representation.
  *
@@ -26,7 +28,7 @@ class Embeddable
      *
      * @param array $data An array of key/value parameters
      *
-     * @throws \BadMethodCallException
+     * @throws BadMethodCallException
      */
     public function __construct(array $data)
     {
@@ -38,7 +40,7 @@ class Embeddable
         foreach ($data as $key => $value) {
             $method = 'set'.str_replace('_', '', (string) $key);
             if (!method_exists($this, $method)) {
-                throw new \BadMethodCallException(
+                throw new BadMethodCallException(
                     sprintf('Unknown property "%s" on annotation "%s".', $key, get_class($this))
                 );
             }

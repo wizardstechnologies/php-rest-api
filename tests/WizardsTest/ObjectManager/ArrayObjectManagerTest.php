@@ -5,7 +5,7 @@ namespace WizardsTest\ObjectManager;
 use PHPUnit\Framework\TestCase;
 use WizardsRest\ObjectManager\ArrayObjectManager;
 use WizardsRest\Parser\RestQueryParser;
-use Zend\Diactoros\ServerRequest;
+use Nyholm\Psr7\ServerRequest;
 
 class ArrayObjectManagerTest extends TestCase
 {
@@ -25,14 +25,8 @@ class ArrayObjectManagerTest extends TestCase
         $collection = [$france, $brasil];
 
         // filter by id >
-        $request = new ServerRequest(
-            [],
-            [],
-            '/posts',
-            'GET',
-            'php://input',
-            [],
-            [],
+        $request = new ServerRequest('GET', '/posts');
+        $request = $request->withQueryParams(
             [
                 RestQueryParser::PARAMETER_FILTER => ['id' => '1'],
                 RestQueryParser::PARAMETER_FILTER_OPERATOR => ['id' => '>']
@@ -41,14 +35,7 @@ class ArrayObjectManagerTest extends TestCase
         $this->assertEquals([$brasil], $objectManager->fetchCollection($collection, $request));
 
         // sort by -domain
-        $request = new ServerRequest(
-            [],
-            [],
-            '/posts',
-            'GET',
-            'php://input',
-            [],
-            [],
+        $request = $request->withQueryParams(
             [
                 RestQueryParser::PARAMETER_SORT => '-domain',
             ]
