@@ -2,6 +2,7 @@
 
 namespace WizardsRest\ObjectReader;
 
+use Doctrine\Common\Collections\Collection;
 use WizardsRest\Annotation\Embeddable;
 use WizardsRest\Annotation\Exposable;
 use Doctrine\Common\Annotations\Reader;
@@ -51,8 +52,12 @@ class DoctrineAnnotationReader implements ObjectReaderInterface
             return null;
         }
 
+        if ($resource instanceof Collection) {
+            $resource = $resource->toArray();
+        }
+
         $reflection = $this->isCollection($resource)
-            ? new ReflectionClass($this->getClassName($resource[0]))
+            ? new ReflectionClass($this->getClassName(array_shift($resource)))
             : new ReflectionClass($this->getClassName($resource));
 
         /**
