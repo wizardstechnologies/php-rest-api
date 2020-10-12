@@ -52,7 +52,7 @@ class RestQueryParser
         return $this->parsedParameters[$name] ?? null;
     }
 
-    public function getParsedSorting()
+    public function getParsedSorting(): array
     {
         $parsed = [];
 

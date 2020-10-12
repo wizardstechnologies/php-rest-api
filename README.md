@@ -25,14 +25,24 @@ The library's conventions are based on the [jsonapi ones](http://jsonapi.org/for
 
 The _RestQueryParser_ will expect those query parameters:
 
-- Collection
-	- `sort`: `name` to sort by ascending name, `-name` to sort by descending name. Example: `?sort=-date`
-	- `filter` to filter resources by values. Example: `?filter[name]=dupont&filter[surname]=thomas`
-	- `filteroperator` to change the default filter opetator from `=` to something else. available operators: `<`, `>`, `<=`, `>=`, `!=`. Example: `?filter[age]=18&filteroperator[age]=>=`
-	- `include` to include relationships data. Example: `/books?include=author,editor`
+- **Collection**
+	- `sort`
+	    - `name` to sort by ascending name
+	    - `-name` to sort by descending name
+	    - Example: `?sort=-date`
+	- `filter` to filter resources by values. 
+	    - multiple values for filters should be provided coma-separated.
+	    - Example: `?filter[name]=dupont,dupond&filter[surname]=thomas`
+	- `filteroperator`
+	    - to change the default filter opetator from `=` to something else. 
+	    - available operators: `<`, `>`, `<=`, `>=`, `!=`, `in`.
+	    - Example: `?filter[age]=18&filteroperator[age]=>=`
+	- `include` to include relationships data.
+	    - Example: `/books?include=author,editor`
 	- `limit`: how many results you want to see by page.
 	- `page`: the page number. Starts at 1.
-- Single resource
+
+- **Single resource**
 	- `include` to include relationships data. Example: `/books/1?include=author,editor`
 
 ## Examples
@@ -93,6 +103,6 @@ We are actively looking for laravel developers to support it !
 
 - Add more tests
 - Add the sparse fieldset feature
-- Add advanced filter operators such as like,in or between
+- Add advanced filter operators such as like or between
 - Optimize how the data are fetched from the source.
 - Think about serialization groups.
