@@ -91,7 +91,7 @@ class DoctrineOrmObjectManager implements ObjectManagerInterface
 
             if (null !== $value) {
                 $operator = $this->getFilterOperator($filterOperators, $field);
-                $queryBuilder->andWhere(sprintf("e.%s%s'%s'", $field, $operator, $value));
+                $this->addFilter($queryBuilder, 'e', $field, $operator, $value);
             }
 
             $values = $this->getSubFiltersValues($filterValues, $field);
@@ -140,8 +140,7 @@ class DoctrineOrmObjectManager implements ObjectManagerInterface
 
             foreach ($values as $subFieldName => $subFieldValue) {
                 $operator = $this->getFilterOperator($filterOperators, $field . '.' . $subFieldName);
-                $whereString = sprintf("%s.%s%s'%s'", $field, $subFieldName, $operator, $subFieldValue);
-                $queryBuilder->andWhere($whereString);
+                $this->addFilter($queryBuilder, $field, $subFieldName, $operator, $subFieldValue);
             }
         }
     }
@@ -178,6 +177,19 @@ class DoctrineOrmObjectManager implements ObjectManagerInterface
         return null;
     }
 
+    /**
+     * Creates a new where filter for your current querybuilder, based on the operator type
+     */
+    private function addFilter(QueryBuilder $queryBuilder, string $parent, string $field, string $operator, string $value)
+    {
+        if ('in' === $operator) {
+            $queryBuilder->andWhere(sprintf("%s.%s IN (%s)", $parent, $field, $operator, $value));
+
+            return;
+        }
+
+        $queryBuilder->andWhere(sprintf("%s.%s%s'%s'", $parent, $field, $operator, $value));
+    }
 
     /**
      * @param array $filterOperators
@@ -187,7 +199,7 @@ class DoctrineOrmObjectManager implements ObjectManagerInterface
      */
     private function getFilterOperator(array $filterOperators, string $field)
     {
-        $allowedFilters = ['>', '<', '>=', '<=', '=', '!='];
+        $allowedFilters = ['>', '<', '>=', '<=', '=', '!=', 'in'];
         if (isset($filterOperators[$field]) && in_array($filterOperators[$field], $allowedFilters)) {
             return $filterOperators[$field];
         }

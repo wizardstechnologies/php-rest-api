@@ -22,17 +22,23 @@ class ArrayObjectManagerTest extends TestCase
             'name' => 'Brasil',
             'domain' => 'b.com'
         ];
-        $collection = [$france, $brasil];
+        $china = [
+            'id' => 3,
+            'name' => 'China',
+            'domain' => 'c.com'
+        ];
+        $collection = [$china, $france, $brasil];
 
         // filter by id >
         $request = new ServerRequest('GET', '/posts');
         $request = $request->withQueryParams(
             [
                 RestQueryParser::PARAMETER_FILTER => ['id' => '1'],
-                RestQueryParser::PARAMETER_FILTER_OPERATOR => ['id' => '>']
+                RestQueryParser::PARAMETER_FILTER_OPERATOR => ['id' => '>'],
+                RestQueryParser::PARAMETER_SORT => 'id',
             ]
         );
-        $this->assertEquals([$brasil], $objectManager->fetchCollection($collection, $request));
+        $this->assertEquals([$brasil, $china], $objectManager->fetchCollection($collection, $request));
 
         // sort by -domain
         $request = $request->withQueryParams(
@@ -40,6 +46,16 @@ class ArrayObjectManagerTest extends TestCase
                 RestQueryParser::PARAMETER_SORT => '-domain',
             ]
         );
-        $this->assertEquals([$brasil, $france], $objectManager->fetchCollection($collection, $request));
+        $this->assertEquals([$china, $brasil, $france], $objectManager->fetchCollection($collection, $request));
+
+
+        // sort by -domain
+        $request = $request->withQueryParams(
+            [
+                RestQueryParser::PARAMETER_FILTER => ['name' => 'Brasil,France'],
+                RestQueryParser::PARAMETER_FILTER_OPERATOR => ['name' => 'in']
+            ]
+        );
+        $this->assertEquals([$france, $brasil], $objectManager->fetchCollection($collection, $request));
     }
 }

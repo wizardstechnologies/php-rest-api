@@ -94,6 +94,8 @@ class ArrayObjectManager implements ObjectManagerInterface
                             return $fieldValue <= $filterValues[$fieldName];
                         case '!=':
                             return $fieldValue != $filterValues[$fieldName];
+                        case 'in':
+                            return in_array($fieldValue, explode(',', $filterValues[$fieldName]));
                     }
                 }
 
