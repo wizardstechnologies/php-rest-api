@@ -183,7 +183,7 @@ class DoctrineOrmObjectManager implements ObjectManagerInterface
     private function addFilter(QueryBuilder $queryBuilder, string $parent, string $field, string $operator, string $value)
     {
         if ('in' === $operator) {
-            $queryBuilder->andWhere(sprintf("%s.%s IN (%s)", $parent, $field, $operator, $value));
+            $queryBuilder->andWhere($queryBuilder->expr()->in(sprintf("%s.%s", $parent, $field), explode(',', $value)));
 
             return;
         }
