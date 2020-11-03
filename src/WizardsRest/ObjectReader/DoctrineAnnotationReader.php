@@ -216,7 +216,7 @@ class DoctrineAnnotationReader implements ObjectReaderInterface
     {
         $class = get_class($resource);
         $marker = '__CG__';
-        $markerPosition = strrpos($marker, '\\' . $marker . '\\');
+        $markerPosition = strrpos($class, '\\' . $marker . '\\');
 
         if (false === $markerPosition) {
             return $class;
