@@ -18,7 +18,7 @@ class RestQueryParser
     /**
      * This is an extra filtering parameter, not documented in jsonapi, but really useful to filter api requests.
      * It supports operators such as <, >, <=, >=, !=
-    */
+     */
     const PARAMETER_FILTER_OPERATOR = 'filteroperator';
 
     const DEFAULT_PAGE = 1;
@@ -88,11 +88,11 @@ class RestQueryParser
             self::PARAMETER_FILTER_OPERATOR => self::DEFAULT_FILTER_OPERATOR,
         ]);
 
-        $resolver->setAllowedTypes(self::PARAMETER_PAGE, ['NULL', 'string']);
-        $resolver->setAllowedTypes(self::PARAMETER_LIMIT, ['NULL', 'string']);
-        $resolver->setAllowedTypes(self::PARAMETER_SORT, ['NULL', 'string']);
-        $resolver->setAllowedTypes(self::PARAMETER_FILTER, ['NULL', 'array']);
-        $resolver->setAllowedTypes(self::PARAMETER_FILTER_OPERATOR, ['NULL', 'array']);
+        $resolver->setAllowedTypes(self::PARAMETER_PAGE, ['null', 'string']);
+        $resolver->setAllowedTypes(self::PARAMETER_LIMIT, ['null', 'string']);
+        $resolver->setAllowedTypes(self::PARAMETER_SORT, ['null', 'string']);
+        $resolver->setAllowedTypes(self::PARAMETER_FILTER, ['null', 'array']);
+        $resolver->setAllowedTypes(self::PARAMETER_FILTER_OPERATOR, ['null', 'array']);
 
         $queryParams = $request->getQueryParams();
 
