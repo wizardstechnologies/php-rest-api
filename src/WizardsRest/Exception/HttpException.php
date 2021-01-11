@@ -3,7 +3,7 @@
 namespace WizardsRest\Exception;
 
 /**
- * HttpException.
+ * A simple HttpException.
  * The whole symfony or laravel http was kinda heavy to include.
  *
  * @author Romain Richard
@@ -15,23 +15,14 @@ class HttpException extends \RuntimeException
      */
     private $statusCode;
 
-    /**
-     * HttpException constructor.
-     *
-     * @param int $statusCode
-     * @param string $message
-     */
-    public function __construct(int $statusCode = 500, string $message = 'Server Error')
+    public function __construct(int $statusCode = 500, ?string $message = null)
     {
         $this->statusCode = $statusCode;
 
         parent::__construct($message);
     }
 
-    /**
-     * @return int
-     */
-    public function getStatusCode()
+    public function getStatusCode(): int
     {
         return $this->statusCode;
     }
