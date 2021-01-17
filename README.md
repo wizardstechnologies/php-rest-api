@@ -1,6 +1,8 @@
 # Wizards Technologies' PHP REST API Library
 A framework agnostic PHP library based on [fractal](https://fractal.thephpleague.com/) to help you craft beautiful REST APIs.
 
+[![Build Status](https://travis-ci.org/wizardstechnologies/php-rest-api.svg?branch=master)](https://travis-ci.org/wizardstechnologies/php-rest-api)
+
 ## Goals
 The main goal is to provide an easy to use and powerful REST API library that seamlessly integrates with modern frameworks.
 

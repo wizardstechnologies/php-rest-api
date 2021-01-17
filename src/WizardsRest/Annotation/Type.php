@@ -3,7 +3,7 @@
 namespace WizardsRest\Annotation;
 
 /**
- * Define an type for serialization (useful for jsonapi)
+ * Define a serialization type. In jsonapi, it defines a entity type.
  *
  * @Annotation
  *
