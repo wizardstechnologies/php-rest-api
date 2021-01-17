@@ -9,9 +9,9 @@
     }
   ],
   "require": {
-    "php": ">=7.1",
+    "php": ">=7.3",
     "psr/http-message": "^1.0",
-    "league/fractal": "^0.17.0",
+    "league/fractal": "^0.19.2",
     "symfony/options-resolver": "^4.1|^5.0"
   },
   "require-dev": {
